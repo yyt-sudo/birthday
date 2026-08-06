@@ -1,0 +1,2397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1c0e13">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ff7c9c' d='M12 21s-7.5-4.7-10-9C.5 8.4 2 5 5.2 5c2 0 3.4 1 4.8 2.4C11.4 6 12.8 5 14.8 5 18 5 19.5 8.4 22 12c-2.5 4.3-10 9-10 9z'/%3E%3C/svg%3E">
+<title>给小周的生日礼物</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    overflow: hidden;
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", "Source Han Sans SC", sans-serif;
+    background: #140a0e;
+  }
+  button { font: inherit; }
+
+  .entry-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      linear-gradient(180deg, rgba(255, 214, 150, .06), transparent 45%),
+      linear-gradient(155deg, #3a1422 0%, #261019 52%, #160b0f 100%);
+    transition: opacity .7s ease, visibility .7s ease;
+  }
+  .entry-gate.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .gate-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 34px 40px;
+    border: 1px solid rgba(255, 215, 150, .28);
+    border-radius: 18px;
+    background: rgba(24, 9, 14, .82);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .5);
+  }
+  .gate-heart {
+    font-size: 46px;
+    line-height: 1;
+    color: #ff7c9c;
+    text-shadow: 0 0 30px rgba(255, 124, 156, .8);
+    animation: heart-beat 1.6s ease-in-out infinite;
+  }
+  .gate-title {
+    margin: 0;
+    font-size: clamp(24px, 4vw, 38px);
+    font-weight: 800;
+    color: #ffe6a3;
+    text-shadow: 0 3px 0 rgba(90, 40, 10, .45), 0 0 26px rgba(255, 214, 120, .5);
+  }
+  .gate-sub {
+    margin: 0;
+    font-size: 14px;
+    letter-spacing: .14em;
+    color: rgba(255, 235, 205, .8);
+  }
+  .gate-input {
+    width: 160px;
+    padding: 12px 16px;
+    border: 1px solid rgba(255, 215, 150, .45);
+    border-radius: 999px;
+    background: rgba(255, 248, 235, .1);
+    color: #ffe6a3;
+    font-size: 20px;
+    text-align: center;
+    letter-spacing: .4em;
+    outline: none;
+  }
+  .gate-input::placeholder { color: rgba(255, 230, 163, .35); letter-spacing: .2em; }
+  .gate-input:focus { border-color: #ffd98a; box-shadow: 0 0 0 3px rgba(255, 217, 138, .18); }
+  .gate-btn {
+    padding: 10px 34px;
+    border: 1px solid rgba(255, 215, 150, .5);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffd98a, #e6a33f);
+    color: #4a2608;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    cursor: pointer;
+  }
+  .gate-btn:hover { filter: brightness(1.08); }
+  .gate-error {
+    margin: 0;
+    font-size: 13px;
+    color: #ff9db4;
+    opacity: 0;
+    transition: opacity .4s ease;
+  }
+  .gate-error.show { opacity: 1; }
+  .gate-codes { display: flex; gap: 10px; }
+  .gate-code {
+    width: 52px;
+    height: 56px;
+    border: 1px solid rgba(255, 215, 150, .45);
+    border-radius: 12px;
+    background: rgba(255, 248, 235, .1);
+    color: #ffe6a3;
+    font-size: 24px;
+    text-align: center;
+    outline: none;
+  }
+  .gate-code:focus { border-color: #ffd98a; box-shadow: 0 0 0 3px rgba(255, 217, 138, .18); }
+
+  .stage { position: fixed; inset: 0; overflow: hidden; }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(1.03);
+    pointer-events: none;
+    transition: opacity .7s ease, transform .7s ease, visibility .7s;
+  }
+  .stage.scene-cake .scene-cake,
+  .stage.scene-greeting .scene-greeting,
+  .stage.scene-photos .scene-photos,
+  .stage.scene-letter .scene-letter,
+  .stage.scene-ending .scene-ending {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  /* ---------- 蛋糕 ---------- */
+  .scene-cake {
+    background:
+      linear-gradient(180deg, rgba(255, 214, 150, .055), transparent 42%),
+      linear-gradient(155deg, #341420 0%, #251019 48%, #160b0f 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .beam {
+    position: absolute;
+    top: -8%;
+    left: 50%;
+    width: 76vw;
+    height: 62vh;
+    transform: translateX(-50%) rotate(7deg);
+    background: linear-gradient(180deg, rgba(255, 216, 150, .09), transparent 72%);
+    filter: blur(18px);
+    pointer-events: none;
+  }
+  .cake-stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(96vw, 880px);
+    perspective: 1200px;
+  }
+  .cake-3d {
+    width: 100%;
+    transform-style: preserve-3d;
+    animation: cake-sway 10s ease-in-out infinite;
+    will-change: transform;
+  }
+  .cake-float {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    animation: cake-float 6s ease-in-out infinite;
+  }
+  .cake-vortex {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 640px;
+    height: 640px;
+    margin: -320px 0 0 -320px;
+    pointer-events: none;
+    z-index: 0;
+    animation: vortex-spin 45s linear infinite;
+  }
+  .vortex-star {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: 0 0 10px var(--c);
+    opacity: .65;
+  }
+  @keyframes vortex-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .cake-art {
+    display: block;
+    width: min(100%, 76vh);
+    height: auto;
+    max-width: 100%;
+    filter: drop-shadow(0 24px 26px rgba(20, 5, 10, .42));
+  }
+  .cake-stack {
+    position: relative;
+    width: 100%;
+    transform-style: preserve-3d;
+    display: none;
+  }
+  .cake-stack .cake-art.clone {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+  }
+  .tier {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-style: preserve-3d;
+  }
+  .face {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    backface-visibility: visible;
+  }
+  .disc {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    border-radius: 50%;
+  }
+  .candle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-style: preserve-3d;
+  }
+  .candle-face {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+  }
+  .flame {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 14px;
+    height: 20px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    background: radial-gradient(circle at 50% 65%, #fff8d8, #ffd44d 45%, #ff8f3d);
+    animation: flicker 1.1s ease-in-out infinite;
+  }
+  .topper {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    color: #ffe6a3;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 46px;
+    font-weight: 800;
+    text-align: center;
+    white-space: nowrap;
+    text-shadow: 0 2px 0 rgba(90, 40, 10, .45), 0 6px 14px rgba(0, 0, 0, .4);
+  }
+  .scene-cake .cake-art { width: min(100%, 86vh); }
+  #cakeSvg .flame,
+  #cakeSvg .glow {
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  #cakeSvg.blown .flame {
+    opacity: 0;
+    transform: scale(.1);
+    animation: none;
+  }
+  #cakeSvg.blown .glow {
+    opacity: 0;
+    transform: scale(.2);
+    animation: none;
+  }
+  .wish-prompt {
+    position: absolute;
+    top: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+    color: rgba(255, 230, 180, .95);
+    font-size: clamp(18px, 3.2vw, 28px);
+    letter-spacing: .14em;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, .5);
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity .6s ease;
+  }
+  .scene-cake.bursting .cake-stage {
+    opacity: .08;
+    filter: blur(10px) brightness(.4);
+    transform: scale(.9);
+    transition: opacity .7s ease, filter .7s ease, transform .7s ease;
+  }
+  .scene-cake.bursting .beam,
+  .scene-cake.bursting .wish-prompt { opacity: 0; }
+  .wish-burst {
+    position: absolute;
+    inset: 0;
+    z-index: 12;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .5s ease;
+  }
+  .wish-burst.show { opacity: 1; }
+  .wish-flash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 248, 220, .95), rgba(255, 200, 120, .5) 34%, transparent 72%);
+    animation: flash-fade 1.1s ease forwards;
+  }
+  .wish-ring {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 222, 140, .95);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    animation: ring-out 1.2s cubic-bezier(.1, .8, .2, 1) forwards;
+  }
+  .wish-ring.ring-2 {
+    animation-delay: .18s;
+    border-color: rgba(255, 255, 255, .8);
+  }
+  .wish-text {
+    position: relative;
+    margin: 0;
+    font-size: clamp(38px, 8vw, 92px);
+    font-weight: 800;
+    letter-spacing: .08em;
+    color: #ffe9b0;
+    text-shadow: 0 4px 0 rgba(90, 40, 10, .5), 0 0 60px rgba(255, 214, 120, .95), 0 0 120px rgba(255, 180, 90, .6);
+  }
+  .wish-text span {
+    display: inline-block;
+    opacity: 0;
+    animation: wish-letter .7s cubic-bezier(.2, .9, .3, 1.35) both;
+    animation-delay: calc(.15s + var(--i) * .12s);
+  }
+  .burst-particles {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+  }
+  .burst-p {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: var(--s);
+    color: var(--c);
+    opacity: 0;
+    animation: burst-fly 1.6s cubic-bezier(.1, .8, .2, 1) forwards;
+  }
+  .burst-p.dot {
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: 0 0 14px var(--c);
+  }
+  @keyframes flash-fade {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  @keyframes ring-out {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(.2); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(9); }
+  }
+  @keyframes wish-letter {
+    from { opacity: 0; transform: translateY(34px) scale(.3); }
+    60% { transform: translateY(-8px) scale(1.12); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes burst-fly {
+    0% { opacity: 1; transform: translate(0, 0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(.4); }
+  }
+  .flame {
+    transform-origin: 50% 100%;
+    transform-box: fill-box;
+    animation: flicker 1.1s ease-in-out infinite;
+  }
+  .glow {
+    transform-origin: 50% 100%;
+    transform-box: fill-box;
+    animation: glow-pulse 1.6s ease-in-out infinite;
+  }
+  .smoke {
+    transform-origin: 50% 100%;
+    transform-box: fill-box;
+    opacity: 0;
+    animation: smoke-rise 3.4s ease-out infinite;
+  }
+  .spark {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: var(--s);
+    height: var(--s);
+    background: #ffe1a3;
+    transform: rotate(45deg);
+    border-radius: 1px;
+    opacity: 0;
+    animation: sparkle var(--d) ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* ---------- 生日快乐 ---------- */
+  .scene-greeting {
+    background:
+      linear-gradient(180deg, rgba(255, 214, 150, .07), transparent 46%),
+      linear-gradient(155deg, #3a1422 0%, #261019 50%, #160b0f 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .greeting-core {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    padding: 34px 46px;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 215, 150, .26);
+    background: rgba(18, 7, 11, .84);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .46);
+  }
+  .title {
+    margin: 0;
+    white-space: nowrap;
+    font-size: clamp(64px, 14vw, 168px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: .02em;
+    color: #ffd37f;
+    text-shadow:
+      0 4px 0 rgba(82, 26, 30, .42),
+      0 14px 34px rgba(0, 0, 0, .55),
+      0 0 30px rgba(255, 190, 90, .2);
+  }
+  .letter { display: inline-block; opacity: 0; }
+  .stage.scene-greeting .letter {
+    opacity: 1;
+    animation: letter-in .5s cubic-bezier(.25, .8, .35, 1) backwards;
+    animation-delay: calc(.12s + var(--i) * .07s);
+  }
+  .subtitle {
+    margin: 22px 0 0;
+    white-space: nowrap;
+    color: rgba(255, 232, 190, .9);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(14px, 2.4vw, 22px);
+    letter-spacing: .42em;
+    text-indent: .42em;
+    opacity: 0;
+  }
+  .stage.scene-greeting .subtitle {
+    opacity: 1;
+    animation: fade-in .7s .6s ease backwards;
+  }
+  .hearts,
+  .confetti {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .heart {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    color: #ff7c9c;
+    font-size: 20px;
+    opacity: 0;
+  }
+  .stage.scene-greeting .heart {
+    animation: heart-burst 1.8s cubic-bezier(.2, .8, .25, 1) both;
+    animation-delay: var(--d);
+  }
+  .confetti i {
+    position: absolute;
+    top: -8%;
+    left: var(--x);
+    width: 9px;
+    height: 14px;
+    background: var(--c);
+    border-radius: 2px;
+    opacity: 0;
+    animation: confetti-fall 3.8s linear var(--d) infinite;
+  }
+
+  /* ---------- 照片墙 ---------- */
+  .scene-photos {
+    background:
+      linear-gradient(180deg, rgba(255, 214, 150, .05), transparent 40%),
+      linear-gradient(155deg, #241019 0%, #170c10 55%, #0e080b 100%);
+  }
+  .floating-hearts {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .heart-float {
+    position: absolute;
+    bottom: -10vh;
+    left: var(--x);
+    color: var(--hc);
+    font-size: var(--hs);
+    line-height: 1;
+    text-shadow: 0 0 14px currentColor;
+    opacity: 0;
+    animation: heart-rise var(--hd) linear var(--hd2) infinite;
+    will-change: transform, opacity;
+  }
+  @keyframes heart-rise {
+    0% { opacity: 0; transform: translateY(0) translateX(0) rotate(-8deg) scale(.7); }
+    8% { opacity: var(--ho); }
+    50% { transform: translateY(-52vh) translateX(var(--sw)) rotate(10deg) scale(1); }
+    92% { opacity: var(--ho); }
+    100% { opacity: 0; transform: translateY(-118vh) translateX(calc(var(--sw) * -1)) rotate(-6deg) scale(1.06); }
+  }
+  .photo-wall {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: clamp(8px, 1vw, 14px);
+    padding: clamp(10px, 1.5vw, 24px);
+    overflow: hidden;
+  }
+  .photos-flash {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 50%, #fff 0%, rgba(255, 214, 150, .85) 45%, transparent 78%);
+    opacity: 0;
+  }
+  .stage.scene-photos .photos-flash { animation: photos-flash 1.1s ease-out both; }
+  @keyframes photos-flash {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .photo {
+    --r: 0deg;
+    --t: 0px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    appearance: none;
+    border: 0;
+    cursor: zoom-in;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    background: #fdf7eb;
+    padding: 6px 6px 12px;
+    border-radius: 5px;
+    box-shadow: 0 16px 32px rgba(8, 3, 6, .45);
+    transform: rotate(var(--r)) translateY(var(--t));
+    opacity: 0;
+    transition: transform .35s ease, box-shadow .35s ease;
+  }
+  .stage.scene-photos .photo {
+    opacity: 1;
+    animation: photo-in 1.15s cubic-bezier(.2, .85, .25, 1.14) backwards;
+    animation-delay: calc(.3s + var(--i) * 70ms);
+  }
+  .photo:hover {
+    transform: rotate(0deg) translateY(-8px) scale(1.04);
+    box-shadow: 0 26px 46px rgba(8, 3, 6, .56);
+    z-index: 6;
+  }
+  .photo:focus-visible { outline: 3px solid #ffd98a; outline-offset: 3px; }
+  .pic {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    background: #efe5d2;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .pic img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .replay {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .1);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 8;
+  }
+  .replay svg {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .replay:hover { background: rgba(255, 255, 255, .22); }
+  .stage:not(.scene-photos):not(.scene-letter) .replay { display: none; }
+
+  .music-btn {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .1);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+  }
+  .music-btn svg {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .music-btn:hover { background: rgba(255, 255, 255, .22); }
+  .music-btn.playing {
+    color: #ffd98a;
+    border-color: rgba(255, 217, 138, .6);
+    background: rgba(255, 217, 138, .14);
+  }
+
+  .hidden { display: none !important; }
+
+  .page-nav {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 9;
+  }
+  .page-arrow {
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .1);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .page-arrow:disabled { opacity: .35; cursor: default; }
+  .page-arrow svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .page-dots {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .page-dot {
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .34);
+    cursor: pointer;
+    transition: width .3s ease, background .3s ease, border-radius .3s ease;
+  }
+  .page-dot.active {
+    width: 26px;
+    border-radius: 6px;
+    background: #ffd98a;
+  }
+  .page-count {
+    color: rgba(255, 235, 205, .78);
+    font-size: 13px;
+    letter-spacing: .14em;
+  }
+
+  /* ---------- 情书 ---------- */
+  .scene-letter {
+    background:
+      linear-gradient(180deg, rgba(255, 214, 150, .08), transparent 45%),
+      linear-gradient(155deg, #3d1523 0%, #271019 52%, #160b0f 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .letter-core {
+    position: relative;
+    z-index: 5;
+    width: min(92vw, 780px);
+    padding: clamp(28px, 4vw, 54px) clamp(22px, 4vw, 58px);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 215, 150, .28);
+    background: linear-gradient(180deg, rgba(24, 9, 14, .92), rgba(24, 9, 14, .74));
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .5);
+  }
+  .letter-seal {
+    position: absolute;
+    top: -19px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #ff9db4, #ef5b7a);
+    color: #fff;
+    font-size: 18px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .35);
+  }
+  .letter-title {
+    margin: 0 0 20px;
+    font-size: clamp(26px, 5vw, 42px);
+    font-weight: 700;
+    text-align: center;
+    color: #ffd98a;
+    text-shadow: 0 3px 0 rgba(82, 26, 30, .4), 0 10px 26px rgba(0, 0, 0, .5);
+    opacity: 0;
+  }
+  .stage.scene-letter .letter-title {
+    opacity: 1;
+    animation: letter-fade .8s .25s ease backwards;
+  }
+  .letter-body {
+    display: grid;
+    gap: 16px;
+  }
+  .letter-line {
+    margin: 0;
+    font-size: clamp(15px, 2.4vw, 19px);
+    line-height: 1.9;
+    letter-spacing: .04em;
+    color: rgba(255, 240, 220, .95);
+    opacity: 0;
+  }
+  .stage.scene-letter .letter-line {
+    opacity: 1;
+  }
+  .letter-sign {
+    margin: 26px 0 0;
+    text-align: right;
+    color: rgba(255, 214, 150, .95);
+    font-size: clamp(14px, 2vw, 17px);
+    letter-spacing: .08em;
+    opacity: 0;
+  }
+  .stage.scene-letter .letter-sign {
+    opacity: 1;
+  }
+  .scene-ending {
+    background:
+      linear-gradient(180deg, rgba(255, 214, 150, .08), transparent 45%),
+      linear-gradient(155deg, #3d1523 0%, #2a1119 52%, #160b0f 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    text-align: center;
+  }
+  .ending-heart {
+    font-size: clamp(64px, 15vw, 140px);
+    line-height: 1;
+    color: #ff7c9c;
+    text-shadow: 0 0 50px rgba(255, 124, 156, .8), 0 0 110px rgba(255, 150, 170, .45);
+    animation: heart-beat 1.6s ease-in-out infinite;
+  }
+  .ending-title {
+    margin: 0;
+    font-size: clamp(30px, 6vw, 64px);
+    font-weight: 800;
+    letter-spacing: .04em;
+    color: #ffe6a3;
+    text-shadow: 0 4px 0 rgba(90, 40, 10, .5), 0 0 40px rgba(255, 214, 120, .7);
+  }
+  .ending-line {
+    margin: 0;
+    font-size: clamp(15px, 2.6vw, 22px);
+    letter-spacing: .14em;
+    color: rgba(255, 240, 220, .9);
+  }
+  .end-back {
+    margin-top: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    border: 1px solid rgba(255, 215, 150, .45);
+    border-radius: 999px;
+    background: rgba(255, 215, 150, .12);
+    color: #ffe6a3;
+    font-size: 15px;
+    letter-spacing: .1em;
+    cursor: pointer;
+  }
+  .end-back svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .end-back:hover { background: rgba(255, 215, 150, .22); }
+  .letter-core {
+    font-family: "KaiTi", "STKaiti", "楷体", "Microsoft YaHei", serif;
+    background:
+      repeating-linear-gradient(0deg, rgba(140, 90, 50, .05) 0 1px, transparent 1px 34px),
+      linear-gradient(180deg, #f6e7cc 0%, #f1dcb8 100%);
+    border: 1px solid rgba(150, 100, 55, .35);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .5);
+  }
+  .letter-title {
+    color: #8a4a25;
+    white-space: nowrap;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .55), 0 4px 14px rgba(0, 0, 0, .25);
+  }
+  .letter-line {
+    color: #4a2c1a;
+    font-weight: 600;
+  }
+  .letter-sign { color: #8a4a25; }
+  .letter-seal {
+    background: radial-gradient(circle at 35% 30%, #e35d6e, #b2264a 72%);
+    border: 2px solid #8f1e3c;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+  }
+  .letter-line.typing::after {
+    content: "|";
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+    color: #8a4a25;
+  }
+  .voice-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    padding: 10px 20px;
+    border: 1px solid rgba(138, 74, 37, .4);
+    border-radius: 999px;
+    background: rgba(255, 248, 235, .85);
+    color: #8a4a25;
+    font-size: 14px;
+    letter-spacing: .06em;
+    cursor: pointer;
+  }
+  .voice-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .voice-btn:hover { background: #fff; }
+  .ending-heart { cursor: pointer; }
+  .ending-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: rgba(255, 235, 205, .75);
+    font-size: clamp(13px, 2vw, 17px);
+    letter-spacing: .18em;
+    animation: hint-bob 1.8s ease-in-out infinite;
+    transition: opacity .6s ease;
+  }
+  .ending-hint svg {
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ending-message {
+    margin: 0;
+    font-size: clamp(16px, 3vw, 26px);
+    letter-spacing: .12em;
+    color: rgba(255, 240, 220, .95);
+    text-shadow: 0 2px 14px rgba(0, 0, 0, .5);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .ending-message.show { opacity: 1; transform: translateY(0); }
+  .ending-stars {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .ending-fireworks {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+    z-index: 3;
+  }
+  .burst-ring {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    border: 3px solid var(--c);
+    border-radius: 50%;
+    animation: ring-out 1.2s cubic-bezier(.1, .8, .2, 1) forwards;
+  }
+  .ending-heart-rain {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .rain-heart {
+    position: absolute;
+    top: -8%;
+    left: var(--x);
+    color: var(--c);
+    font-size: var(--s);
+    opacity: 0;
+    animation: heart-rain var(--d) linear var(--delay) infinite;
+  }
+  @keyframes heart-rain {
+    0% { opacity: 0; transform: translateY(-6vh) rotate(-10deg); }
+    10% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(116vh) rotate(10deg); }
+  }
+  .ending-star {
+    position: absolute;
+    top: -6%;
+    left: var(--x);
+    color: var(--c);
+    font-size: var(--s);
+    opacity: 0;
+    animation: star-fall var(--d) linear var(--delay) infinite;
+  }
+  .tap-spark {
+    position: fixed;
+    left: var(--x);
+    top: var(--y);
+    z-index: 40;
+    font-size: var(--s);
+    color: var(--c);
+    pointer-events: none;
+    animation: tap-float 1.1s ease-out forwards;
+    text-shadow: 0 0 12px currentColor;
+  }
+  @keyframes star-fall {
+    0% { opacity: 0; transform: translateY(-6vh) rotate(0deg); }
+    12% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(112vh) rotate(360deg); }
+  }
+  @keyframes tap-float {
+    0% { opacity: 1; transform: translateY(0) scale(.6); }
+    100% { opacity: 0; transform: translateY(-90px) scale(1.2); }
+  }
+  @keyframes hint-bob {
+    0%, 100% { transform: translateY(2px); opacity: .7; }
+    50% { transform: translateY(-6px); opacity: 1; }
+  }
+  @keyframes heart-beat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.12); }
+    40% { transform: scale(1); }
+    60% { transform: scale(1.08); }
+  }
+  @keyframes letter-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ---------- 提示与灯箱 ---------- */
+  .hint {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(255, 235, 205, .82);
+    font-size: 15px;
+    letter-spacing: .22em;
+    opacity: 0;
+    transition: opacity .6s ease;
+    pointer-events: none;
+    z-index: 30;
+  }
+  .stage.scene-cake .hint,
+  .stage.scene-greeting .hint { opacity: 1; }
+  .stage.scene-letter .hint { opacity: 1; }
+  .stage.scene-cake .hint { opacity: 0; }
+  .stage.scene-photos .hint {
+    bottom: 78px;
+    opacity: 0;
+  }
+  .stage.scene-photos .hint.show { opacity: 1; }
+  .hint::before,
+  .hint::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    transform: rotate(45deg);
+    background: #ffd98a;
+    animation: blink 1.7s ease-in-out infinite;
+  }
+  .hint::after { animation-delay: .45s; }
+
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8, 3, 6, .9);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+  }
+  .lightbox.open { opacity: 1; pointer-events: auto; }
+  .lightbox img {
+    max-width: min(94vw, 1400px);
+    max-height: 86vh;
+    border-radius: 6px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .65);
+    transform: scale(.95);
+    opacity: 1;
+    transition: transform .3s ease, opacity .3s ease;
+  }
+  .lightbox.open img { transform: scale(1); }
+  .lightbox.loading img { opacity: 0; }
+  .lightbox.loading::after {
+    content: "";
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    border: 3px solid rgba(255, 255, 255, .22);
+    border-top-color: #ffd98a;
+    border-radius: 50%;
+    animation: lb-spin .8s linear infinite;
+  }
+  @keyframes lb-spin { to { transform: rotate(360deg); } }
+  .lb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .1);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+  }
+  .lb-nav:hover { background: rgba(255, 255, 255, .22); }
+  .lb-nav svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .lb-nav.prev { left: 18px; }
+  .lb-nav.next { right: 18px; }
+  .close {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .close:hover { background: rgba(255, 255, 255, .22); }
+
+  /* ---------- 动画 ---------- */
+  @keyframes cake-sway {
+    0%, 100% { transform: rotateX(3deg); }
+    50% { transform: rotateX(1deg); }
+  }
+  @keyframes cake-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes flicker {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    30% { transform: scale(1.1, 1.22) rotate(-2deg); }
+    62% { transform: scale(.93, .88) rotate(2deg); }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { opacity: .45; transform: scale(1); }
+    50% { opacity: .95; transform: scale(1.18); }
+  }
+  @keyframes smoke-rise {
+    0% { opacity: 0; transform: translateY(0); }
+    25% { opacity: .34; }
+    100% { opacity: 0; transform: translateY(-58px); }
+  }
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: rotate(45deg) scale(.4); }
+    50% { opacity: .95; transform: rotate(45deg) scale(1); }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: .35; transform: rotate(45deg) scale(.8); }
+    50% { opacity: 1; transform: rotate(45deg) scale(1.15); }
+  }
+  @keyframes letter-in {
+    from { opacity: 0; transform: scale(.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes heart-burst {
+    0% { opacity: 0; transform: translate(0, 0) scale(.2); }
+    18% { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1); }
+  }
+  @keyframes confetti-fall {
+    0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+    100% { opacity: .95; transform: translateY(116vh) rotate(740deg); }
+  }
+  @keyframes photo-in {
+    from { opacity: 0; transform: rotate(35deg) translateY(0) scale(.08); filter: blur(8px); }
+    to { opacity: 1; transform: rotate(var(--r)) translateY(var(--t)) scale(1); filter: blur(0); }
+  }
+
+  @media (max-width: 760px) {
+    .cake-stage { width: min(96vw, 480px); }
+    .hint { bottom: 22px; font-size: 13px; letter-spacing: .16em; }
+    .stage.scene-photos .hint { bottom: 68px; }
+    .greeting-core { padding: 24px 18px; border-radius: 16px; }
+    .title { font-size: clamp(48px, 16vw, 96px); }
+    .letter-title { font-size: clamp(22px, 5.4vw, 30px); }
+    .subtitle { margin-top: 16px; letter-spacing: .3em; }
+    .photo {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 5;
+      padding: 4px 4px 8px;
+    }
+    .photo-wall {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: auto;
+      gap: 10px;
+      padding: 10px;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .photo-wall::-webkit-scrollbar { display: none; }
+    .photo {
+      padding: 4px 4px 10px;
+    }
+    .replay { top: 12px; right: 12px; width: 42px; height: 42px; }
+    .music-btn { top: 12px; left: 12px; width: 42px; height: 42px; }
+    .page-nav { bottom: 12px; gap: 10px; }
+    .page-arrow { width: 36px; height: 36px; }
+    .close { top: 12px; right: 14px; }
+  }
+</style>
+</head>
+<body>
+  <div class="entry-gate" id="entryGate">
+    <div class="gate-box">
+      <div class="gate-heart" aria-hidden="true">♥</div>
+      <h1 class="gate-title">小周的专属入口</h1>
+      <p class="gate-sub">输入她的生日，开启礼物</p>
+      <div class="gate-codes" id="gateCodes">
+        <input class="gate-code" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="第 1 位">
+        <input class="gate-code" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="第 2 位">
+        <input class="gate-code" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="第 3 位">
+        <input class="gate-code" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="第 4 位">
+      </div>
+      <button class="gate-btn" id="gateBtn" type="button">进入</button>
+      <p class="gate-error" id="gateError">密码不对哦，再想想</p>
+    </div>
+  </div>
+  <audio id="bgm" src="Celebrate-Red%20Velvet.mp3" loop preload="auto"></audio>
+  <audio id="voiceMsg" src="录音机-20260806-1534..m4a" preload="auto"></audio>
+  <div class="stage scene-greeting" id="stage">
+    <button class="music-btn" id="musicBtn" type="button" title="播放音乐" aria-label="播放音乐">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    </button>
+
+    <section class="scene scene-greeting" id="greetingScene">
+      <div class="greeting-core">
+        <h1 class="title" aria-label="生日快乐">
+          <span class="letter" style="--i:0">生</span>
+          <span class="letter" style="--i:1">日</span>
+          <span class="letter" style="--i:2">快</span>
+          <span class="letter" style="--i:3">乐</span>
+        </h1>
+        <p class="subtitle">HAPPY BIRTHDAY · 小周</p>
+      </div>
+      <div class="hearts" id="hearts"></div>
+      <div class="confetti" id="confetti"></div>
+    </section>
+
+    <section class="scene scene-cake" id="cakeScene">
+      <div class="beam"></div>
+      <div class="cake-vortex" id="cakeVortex" aria-hidden="true"></div>
+      <div class="cake-stage" id="cakeStage">
+        <div class="cake-3d">
+          <div class="cake-float">
+            <div class="cake-stack" id="cakeStack">
+            <svg class="cake-art" id="cakeShape" style="display:none" viewBox="0 0 560 520" role="img" aria-label="22岁生日蛋糕">
+              <defs>
+                <linearGradient id="c22-plate" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#fdf7ea"/>
+                  <stop offset="1" stop-color="#dcc5a4"/>
+                </linearGradient>
+                <linearGradient id="c22-bottom" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#ffe1ea"/>
+                  <stop offset=".5" stop-color="#f6adc6"/>
+                  <stop offset="1" stop-color="#e07f9f"/>
+                </linearGradient>
+                <linearGradient id="c22-middle" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#fff3da"/>
+                  <stop offset=".5" stop-color="#f4cf98"/>
+                  <stop offset="1" stop-color="#dcab63"/>
+                </linearGradient>
+                <linearGradient id="c22-top" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#ffe5ef"/>
+                  <stop offset=".5" stop-color="#f3a9c4"/>
+                  <stop offset="1" stop-color="#de7da4"/>
+                </linearGradient>
+                <linearGradient id="c22-cream" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#fffaf0"/>
+                  <stop offset="1" stop-color="#f5e5cc"/>
+                </linearGradient>
+                <linearGradient id="c22-gold" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stop-color="#e0a83e"/>
+                  <stop offset=".5" stop-color="#ffe6a3"/>
+                  <stop offset="1" stop-color="#e0a83e"/>
+                </linearGradient>
+                <linearGradient id="c22-shade" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stop-color="#7e1e40" stop-opacity=".38"/>
+                  <stop offset=".18" stop-color="#7e1e40" stop-opacity=".05"/>
+                  <stop offset=".5" stop-color="#7e1e40" stop-opacity="0"/>
+                  <stop offset=".82" stop-color="#7e1e40" stop-opacity=".06"/>
+                  <stop offset="1" stop-color="#7e1e40" stop-opacity=".4"/>
+                </linearGradient>
+                <radialGradient id="c22-flame" cx=".5" cy=".75" r=".7">
+                  <stop offset="0" stop-color="#fff8d8"/>
+                  <stop offset=".42" stop-color="#ffd44d"/>
+                  <stop offset="1" stop-color="#ff8f3d"/>
+                </radialGradient>
+                <filter id="c22-blur" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="7"/>
+                </filter>
+              </defs>
+
+              <ellipse cx="280" cy="482" rx="230" ry="27" fill="rgba(24,6,13,.45)" filter="url(#c22-blur)"/>
+              <ellipse cx="280" cy="470" rx="205" ry="36" fill="url(#c22-plate)"/>
+              <ellipse cx="280" cy="464" rx="205" ry="36" fill="#fdf6e8"/>
+              <ellipse cx="280" cy="457" rx="178" ry="30" fill="rgba(255,255,255,.55)"/>
+              <ellipse cx="280" cy="464" rx="205" ry="36" fill="none" stroke="#e9d6b8" stroke-width="4"/>
+              <ellipse cx="280" cy="472" rx="150" ry="20" fill="rgba(255,255,255,.16)"/>
+
+              <g>
+                <rect x="118" y="336" width="324" height="108" rx="16" fill="url(#c22-bottom)"/>
+                <rect x="118" y="336" width="324" height="108" rx="16" fill="url(#c22-shade)"/>
+                <ellipse cx="280" cy="336" rx="162" ry="27" fill="#ffc9da"/>
+                <path d="M118 338 q20.25 22 40.5 0 q20.25 22 40.5 0 q20.25 22 40.5 0 q20.25 22 40.5 0 q20.25 22 40.5 0 q20.25 22 40.5 0 q20.25 22 40.5 0 q20.25 22 40.5 0 V444 H118 Z" fill="url(#c22-cream)"/>
+              </g>
+
+              <text x="280" y="424" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="84" font-weight="800" fill="rgba(0,0,0,.22)" transform="translate(2 4)">22</text>
+              <text x="280" y="424" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="84" font-weight="800" fill="url(#c22-gold)" stroke="#9a6a1d" stroke-width="1.6" paint-order="stroke">22</text>
+              <path d="M280 434 c-2.6-5.2 -13-7 -13-13 a7 7 0 0 1 13-4.4 a7 7 0 0 1 13 4.4 c0 6 -10.4 7.8 -13 13 z" fill="#ef5b7a" stroke="#fff0e2" stroke-width="1.6"/>
+
+              <g fill="#fff3dd" opacity=".95">
+                <circle cx="142" cy="426" r="4.5"/>
+                <circle cx="175" cy="432" r="4.5"/>
+                <circle cx="212" cy="422" r="4.5"/>
+                <circle cx="348" cy="422" r="4.5"/>
+                <circle cx="385" cy="432" r="4.5"/>
+                <circle cx="418" cy="426" r="4.5"/>
+              </g>
+
+              <g>
+                <rect x="172" y="246" width="216" height="98" rx="14" fill="url(#c22-middle)"/>
+                <rect x="172" y="246" width="216" height="98" rx="14" fill="url(#c22-shade)"/>
+                <ellipse cx="280" cy="246" rx="108" ry="20" fill="#ffe2ae"/>
+                <path d="M172 248 q13.5 16 27 0 q13.5 16 27 0 q13.5 16 27 0 q13.5 16 27 0 q13.5 16 27 0 q13.5 16 27 0 q13.5 16 27 0 q13.5 16 27 0 V344 H172 Z" fill="url(#c22-cream)"/>
+                <rect x="172" y="292" width="216" height="9" rx="4.5" fill="url(#c22-gold)"/>
+                <path d="M280 316 c-3.4-6.8 -16-9 -16-17 a8.6 8.6 0 0 1 16-5.4 a8.6 8.6 0 0 1 16 5.4 c0 8 -12.6 10.2 -16 17 z" fill="#e7a642" stroke="#fff3d8" stroke-width="1.4"/>
+              </g>
+
+              <g>
+                <rect x="218" y="178" width="124" height="74" rx="12" fill="url(#c22-top)"/>
+                <rect x="218" y="178" width="124" height="74" rx="12" fill="url(#c22-shade)"/>
+                <ellipse cx="280" cy="178" rx="62" ry="14" fill="#ffd0df"/>
+                <path d="M218 180 q7.75 12 15.5 0 q7.75 12 15.5 0 q7.75 12 15.5 0 q7.75 12 15.5 0 q7.75 12 15.5 0 q7.75 12 15.5 0 q7.75 12 15.5 0 q7.75 12 15.5 0 V250 H218 Z" fill="url(#c22-cream)"/>
+                <circle cx="242" cy="224" r="4.5" fill="#fff6e8" opacity=".95"/>
+                <circle cx="318" cy="224" r="4.5" fill="#fff6e8" opacity=".95"/>
+              </g>
+
+              <g>
+                <path class="smoke" d="M238 92 q7 -12 -1 -22 q-8 -10 2 -20" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="5" stroke-linecap="round" style="animation-delay:.2s"/>
+                <path class="smoke" d="M280 92 q7 -12 -1 -22 q-8 -10 2 -20" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="5" stroke-linecap="round" style="animation-delay:1.1s"/>
+                <path class="smoke" d="M322 92 q7 -12 -1 -22 q-8 -10 2 -20" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="5" stroke-linecap="round" style="animation-delay:2s"/>
+              </g>
+
+              <g>
+                <rect x="231.5" y="118" width="13" height="60" rx="5" fill="#ff9f7a"/>
+                <rect x="231.5" y="130" width="13" height="6" fill="#ffd0b8" opacity=".85"/>
+                <rect x="231.5" y="142" width="13" height="6" fill="#ffd0b8" opacity=".85"/>
+                <rect x="231.5" y="154" width="13" height="6" fill="#ffd0b8" opacity=".85"/>
+                <line x1="238" y1="118" x2="238" y2="110" stroke="#7a4a32" stroke-width="2.2" stroke-linecap="round"/>
+                <ellipse class="glow" cx="238" cy="99" rx="13" ry="19" fill="rgba(255,190,90,.28)" style="animation-delay:.15s"/>
+                <ellipse class="flame" cx="238" cy="99" rx="7.2" ry="14" fill="url(#c22-flame)"/>
+              </g>
+              <g>
+                <rect x="273.5" y="118" width="13" height="60" rx="5" fill="#ffd98a"/>
+                <rect x="273.5" y="130" width="13" height="6" fill="#ffefc9" opacity=".85"/>
+                <rect x="273.5" y="142" width="13" height="6" fill="#ffefc9" opacity=".85"/>
+                <rect x="273.5" y="154" width="13" height="6" fill="#ffefc9" opacity=".85"/>
+                <line x1="280" y1="118" x2="280" y2="110" stroke="#7a4a32" stroke-width="2.2" stroke-linecap="round"/>
+                <ellipse class="glow" cx="280" cy="99" rx="13" ry="19" fill="rgba(255,190,90,.28)"/>
+                <ellipse class="flame" cx="280" cy="99" rx="7.2" ry="14" fill="url(#c22-flame)" style="animation-delay:.18s"/>
+              </g>
+              <g>
+                <rect x="315.5" y="118" width="13" height="60" rx="5" fill="#ff8fa3"/>
+                <rect x="315.5" y="130" width="13" height="6" fill="#ffd4dd" opacity=".85"/>
+                <rect x="315.5" y="142" width="13" height="6" fill="#ffd4dd" opacity=".85"/>
+                <rect x="315.5" y="154" width="13" height="6" fill="#ffd4dd" opacity=".85"/>
+                <line x1="322" y1="118" x2="322" y2="110" stroke="#7a4a32" stroke-width="2.2" stroke-linecap="round"/>
+                <ellipse class="glow" cx="322" cy="99" rx="13" ry="19" fill="rgba(255,190,90,.28)" style="animation-delay:.35s"/>
+                <ellipse class="flame" cx="322" cy="99" rx="7.2" ry="14" fill="url(#c22-flame)" style="animation-delay:.4s"/>
+              </g>
+            </svg>
+          </div>
+            <svg class="cake-art" id="cakeSvg" viewBox="0 0 560 520" role="img" aria-label="生日蛋糕">
+              <defs>
+                <linearGradient id="plate-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#fdf6e8"/>
+                  <stop offset="1" stop-color="#dcc5a4"/>
+                </linearGradient>
+                <linearGradient id="bottom-body" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#ffe1ea"/>
+                  <stop offset=".55" stop-color="#f8b7cd"/>
+                  <stop offset="1" stop-color="#e889a9"/>
+                </linearGradient>
+                <linearGradient id="middle-body" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#fff2d7"/>
+                  <stop offset=".55" stop-color="#f5d196"/>
+                  <stop offset="1" stop-color="#dfae67"/>
+                </linearGradient>
+                <linearGradient id="top-body" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#ffe4ee"/>
+                  <stop offset=".55" stop-color="#f5aec8"/>
+                  <stop offset="1" stop-color="#e282a7"/>
+                </linearGradient>
+                <linearGradient id="cream-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#fffaf0"/>
+                  <stop offset="1" stop-color="#f6e6cf"/>
+                </linearGradient>
+                <linearGradient id="gold-grad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stop-color="#d9a441"/>
+                  <stop offset=".5" stop-color="#ffe3a1"/>
+                  <stop offset="1" stop-color="#d9a441"/>
+                </linearGradient>
+                <linearGradient id="shade-grad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stop-color="#8a2147" stop-opacity=".28"/>
+                  <stop offset=".16" stop-color="#8a2147" stop-opacity=".06"/>
+                  <stop offset=".5" stop-color="#8a2147" stop-opacity="0"/>
+                  <stop offset=".84" stop-color="#8a2147" stop-opacity=".07"/>
+                  <stop offset="1" stop-color="#8a2147" stop-opacity=".3"/>
+                </linearGradient>
+                <radialGradient id="flame-grad" cx=".5" cy=".75" r=".7">
+                  <stop offset="0" stop-color="#fff8d8"/>
+                  <stop offset=".42" stop-color="#ffd44d"/>
+                  <stop offset="1" stop-color="#ff8f3d"/>
+                </radialGradient>
+                <filter id="soft-blur" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="7"/>
+                </filter>
+              </defs>
+
+              <ellipse cx="280" cy="478" rx="228" ry="27" fill="rgba(24,6,13,.45)" filter="url(#soft-blur)"/>
+              <ellipse cx="280" cy="466" rx="202" ry="35" fill="url(#plate-grad)"/>
+              <ellipse cx="280" cy="460" rx="202" ry="35" fill="#fdf6e8"/>
+              <ellipse cx="280" cy="454" rx="176" ry="29" fill="rgba(255,255,255,.5)"/>
+
+              <g>
+                <rect x="118" y="338" width="324" height="104" rx="14" fill="url(#bottom-body)"/>
+                <rect x="118" y="338" width="324" height="104" rx="14" fill="url(#shade-grad)"/>
+                <ellipse cx="280" cy="338" rx="162" ry="27" fill="#ffc9da"/>
+                <path d="M118 340 q20.25 22 40.5 0 q20.25 22 40.5 0 q20.25 22 40.5 0 q20.25 22 40.5 0 q20.25 22 40.5 0 q20.25 22 40.5 0 q20.25 22 40.5 0 q20.25 22 40.5 0 V440 H118 Z" fill="url(#cream-grad)"/>
+              </g>
+              <g>
+                <rect x="170" y="252" width="220" height="92" rx="12" fill="url(#middle-body)"/>
+                <rect x="170" y="252" width="220" height="92" rx="12" fill="url(#shade-grad)"/>
+                <ellipse cx="280" cy="252" rx="110" ry="22" fill="#ffe2ae"/>
+                <path d="M170 254 q13.75 18 27.5 0 q13.75 18 27.5 0 q13.75 18 27.5 0 q13.75 18 27.5 0 q13.75 18 27.5 0 q13.75 18 27.5 0 q13.75 18 27.5 0 q13.75 18 27.5 0 V342 H170 Z" fill="url(#cream-grad)"/>
+                <rect x="170" y="292" width="220" height="9" rx="4.5" fill="url(#gold-grad)"/>
+              </g>
+              <g>
+                <rect x="214" y="180" width="132" height="78" rx="10" fill="url(#top-body)"/>
+                <rect x="214" y="180" width="132" height="78" rx="10" fill="url(#shade-grad)"/>
+                <ellipse cx="280" cy="180" rx="66" ry="15" fill="#ffd0df"/>
+                <path d="M214 182 q8.25 14 16.5 0 q8.25 14 16.5 0 q8.25 14 16.5 0 q8.25 14 16.5 0 q8.25 14 16.5 0 q8.25 14 16.5 0 q8.25 14 16.5 0 q8.25 14 16.5 0 V250 H214 Z" fill="url(#cream-grad)"/>
+              </g>
+
+              <g fill="#ff8fa3" transform="rotate(-16 176 398)"><rect x="170" y="395" width="12" height="6" rx="3"/></g>
+              <g fill="#ffd98a" transform="rotate(12 218 410)"><rect x="212" y="407" width="12" height="6" rx="3"/></g>
+              <g fill="#8fd3c7" transform="rotate(-24 262 396)"><rect x="256" y="393" width="12" height="6" rx="3"/></g>
+              <g fill="#ffb3c1" transform="rotate(20 308 412)"><rect x="302" y="409" width="12" height="6" rx="3"/></g>
+              <g fill="#ffe1a3" transform="rotate(-10 356 398)"><rect x="350" y="395" width="12" height="6" rx="3"/></g>
+              <g fill="#ff9f7a" transform="rotate(15 402 410)"><rect x="396" y="407" width="12" height="6" rx="3"/></g>
+              <g fill="#8fd3c7" transform="rotate(-18 200 428)"><rect x="194" y="425" width="12" height="6" rx="3"/></g>
+              <g fill="#ffd98a" transform="rotate(22 300 430)"><rect x="294" y="427" width="12" height="6" rx="3"/></g>
+              <g fill="#ff8fa3" transform="rotate(-8 380 428)"><rect x="374" y="425" width="12" height="6" rx="3"/></g>
+
+              <g fill="#fff3dd" opacity=".9">
+                <circle cx="140" cy="424" r="4"/>
+                <circle cx="170" cy="430" r="4"/>
+                <circle cx="205" cy="420" r="4"/>
+                <circle cx="250" cy="430" r="4"/>
+                <circle cx="310" cy="420" r="4"/>
+                <circle cx="355" cy="430" r="4"/>
+                <circle cx="390" cy="420" r="4"/>
+                <circle cx="420" cy="430" r="4"/>
+              </g>
+
+              <g>
+                <rect x="170" y="284" width="220" height="30" rx="6" fill="url(#gold-grad)" opacity=".16"/>
+                <path d="M280 316 c-3.4-6.8 -16-9 -16-17 a8.6 8.6 0 0 1 16-5.4 a8.6 8.6 0 0 1 16 5.4 c0 8 -12.6 10.2 -16 17 z" fill="#e7a642" stroke="#fff3d8" stroke-width="1.4"/>
+              </g>
+
+              <path d="M280 408 c-5-10 -21-13 -21-24 a11 11 0 0 1 21-7 a11 11 0 0 1 21 7 c0 11 -16 14 -21 24 z" fill="#ef5b7a" stroke="#fff0e2" stroke-width="2"/>
+
+              <g>
+                <path d="M254 173 c-2.3-8.6 -10.8-9.8 -10.8-16.4 a5.8 5.8 0 0 1 10.8-3.9 a5.8 5.8 0 0 1 10.8 3.9 c0 6.6 -8.5 7.8 -10.8 16.4 z" fill="#ef5b7a" stroke="#c93f60" stroke-width="1.2"/>
+                <path d="M254 160 q4 6 9 3 q-2 8 -9 9 q-7 -1 -9 -9 q5 3 9 -3 z" fill="#6fae54"/>
+                <circle cx="250" cy="166" r="1" fill="#ffd9a3"/>
+                <circle cx="258" cy="164" r="1" fill="#ffd9a3"/>
+                <circle cx="254" cy="171" r="1" fill="#ffd9a3"/>
+
+                <path d="M306 173 c-2.3-8.6 -10.8-9.8 -10.8-16.4 a5.8 5.8 0 0 1 10.8-3.9 a5.8 5.8 0 0 1 10.8 3.9 c0 6.6 -8.5 7.8 -10.8 16.4 z" fill="#ef5b7a" stroke="#c93f60" stroke-width="1.2"/>
+                <path d="M306 160 q4 6 9 3 q-2 8 -9 9 q-7 -1 -9 -9 q5 3 9 -3 z" fill="#6fae54"/>
+                <circle cx="302" cy="166" r="1" fill="#ffd9a3"/>
+                <circle cx="310" cy="164" r="1" fill="#ffd9a3"/>
+                <circle cx="306" cy="171" r="1" fill="#ffd9a3"/>
+
+                <circle cx="280" cy="152" r="8" fill="#7c86d4"/>
+                <ellipse cx="277" cy="149" rx="3" ry="2.2" fill="rgba(255,255,255,.45)"/>
+                <path d="M275 145 l5 -2.5 l5 2.5 l-5 2 z" fill="#5d5fa8"/>
+              </g>
+
+              <g>
+                <path class="smoke" d="M240 92 q7 -12 -1 -22 q-8 -10 2 -20" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="5" stroke-linecap="round" style="animation-delay:.2s"/>
+                <path class="smoke" d="M280 92 q7 -12 -1 -22 q-8 -10 2 -20" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="5" stroke-linecap="round" style="animation-delay:1.1s"/>
+                <path class="smoke" d="M320 92 q7 -12 -1 -22 q-8 -10 2 -20" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="5" stroke-linecap="round" style="animation-delay:2s"/>
+              </g>
+
+              <g>
+                <rect x="233.5" y="122" width="13" height="58" rx="5" fill="#ff9f7a"/>
+                <rect x="233.5" y="134" width="13" height="6" fill="#ffd0b8" opacity=".85"/>
+                <rect x="233.5" y="146" width="13" height="6" fill="#ffd0b8" opacity=".85"/>
+                <rect x="233.5" y="158" width="13" height="6" fill="#ffd0b8" opacity=".85"/>
+                <line x1="240" y1="122" x2="240" y2="114" stroke="#7a4a32" stroke-width="2.2" stroke-linecap="round"/>
+                <ellipse class="glow" cx="240" cy="103" rx="13" ry="19" fill="rgba(255,190,90,.28)" style="animation-delay:.15s"/>
+                <ellipse class="flame" cx="240" cy="103" rx="7.2" ry="14" fill="url(#flame-grad)"/>
+              </g>
+              <g>
+                <rect x="273.5" y="122" width="13" height="58" rx="5" fill="#ffd98a"/>
+                <rect x="273.5" y="134" width="13" height="6" fill="#ffefc9" opacity=".85"/>
+                <rect x="273.5" y="146" width="13" height="6" fill="#ffefc9" opacity=".85"/>
+                <rect x="273.5" y="158" width="13" height="6" fill="#ffefc9" opacity=".85"/>
+                <line x1="280" y1="122" x2="280" y2="114" stroke="#7a4a32" stroke-width="2.2" stroke-linecap="round"/>
+                <ellipse class="glow" cx="280" cy="103" rx="13" ry="19" fill="rgba(255,190,90,.28)"/>
+                <ellipse class="flame" cx="280" cy="103" rx="7.2" ry="14" fill="url(#flame-grad)" style="animation-delay:.18s"/>
+              </g>
+              <g>
+                <rect x="313.5" y="122" width="13" height="58" rx="5" fill="#ff8fa3"/>
+                <rect x="313.5" y="134" width="13" height="6" fill="#ffd4dd" opacity=".85"/>
+                <rect x="313.5" y="146" width="13" height="6" fill="#ffd4dd" opacity=".85"/>
+                <rect x="313.5" y="158" width="13" height="6" fill="#ffd4dd" opacity=".85"/>
+                <line x1="320" y1="122" x2="320" y2="114" stroke="#7a4a32" stroke-width="2.2" stroke-linecap="round"/>
+                <ellipse class="glow" cx="320" cy="103" rx="13" ry="19" fill="rgba(255,190,90,.28)" style="animation-delay:.35s"/>
+                <ellipse class="flame" cx="320" cy="103" rx="7.2" ry="14" fill="url(#flame-grad)" style="animation-delay:.4s"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="wish-prompt" id="wishPrompt">许个愿吧 · 点击蜡烛吹灭</div>
+      <div class="wish-burst" id="wishBurst" aria-hidden="true">
+        <div class="wish-flash"></div>
+        <span class="wish-ring"></span>
+        <span class="wish-ring ring-2"></span>
+        <div class="burst-particles" id="burstParticles"></div>
+        <p class="wish-text">
+          <span style="--i:0">愿</span><span style="--i:1">望</span><span style="--i:2">一</span><span style="--i:3">定</span><span style="--i:4">会</span><span style="--i:5">实</span><span style="--i:6">现</span>
+        </p>
+      </div>
+      <div class="confetti" id="cakeConfetti"></div>
+    </section>
+
+    <section class="scene scene-photos" id="photoScene">
+      <div class="floating-hearts" id="floatingHearts" aria-hidden="true"></div>
+      <div class="photos-flash" aria-hidden="true"></div>
+      <div class="photo-wall" id="photoPage1" aria-label="照片墙"></div>
+      <div class="photo-wall hidden" id="photoPage2" aria-label="照片墙"></div>
+      <div class="page-nav">
+        <button class="page-arrow" id="pagePrevBtn" type="button" aria-label="上一页" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="page-dots" id="pageDots"></div>
+        <span class="page-count" id="pageCount">1 / 2</span>
+        <button class="page-arrow" id="pageNextBtn" type="button" aria-label="下一页">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section class="scene scene-letter" id="letterScene">
+      <div class="floating-hearts" id="letterHearts" aria-hidden="true"></div>
+      <div class="letter-core">
+        <span class="letter-seal" aria-hidden="true">♥</span>
+        <h2 class="letter-title">亲爱的宝贝，生日快乐。</h2>
+        <div class="letter-body">
+          <p class="letter-line" style="--i:0">你是这世上我最想珍惜的人。喜欢你的笑，你的好，和你偶尔的小迷糊。</p>
+          <p class="letter-line" style="--i:1">新的一岁，愿你平安、快乐，所有愿望都慢慢实现。我会一直在你身边，陪你日出日落，陪你细水长流。</p>
+          <p class="letter-line" style="--i:2">生日快乐，我的女孩。永远爱你。</p>
+        </div>
+        <p class="letter-sign">——爱你的男朋友</p>
+        <button class="voice-btn" id="voiceBtn" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+          <span id="voiceLabel">播放我的留言</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="scene scene-ending" id="endingScene">
+      <div class="ending-stars" id="endingStars" aria-hidden="true"></div>
+      <div class="ending-heart-rain" id="endingHeartRain" aria-hidden="true"></div>
+      <div class="ending-fireworks" id="endingFireworks" aria-hidden="true"></div>
+      <div class="ending-heart" id="endingHeart" aria-hidden="true">♥</div>
+      <p class="ending-hint" id="endingHint">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+      </p>
+      <h2 class="ending-title">宝贝，22 岁生日快乐</h2>
+      <p class="ending-line">遇见你，是这些年最好的礼物</p>
+      <p class="ending-message" id="endingMessage">我们的故事未完待续</p>
+      <button class="end-back" id="endBackBtn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        <span>回到开始</span>
+      </button>
+    </section>
+
+    <button class="replay" id="replayBtn" type="button" title="重新开始" aria-label="重新开始">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+    </button>
+
+    <p class="hint" id="hintText">开启礼物</p>
+  </div>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="查看照片">
+    <img id="lightboxImg" src="" alt="">
+    <button class="lb-nav prev" id="lbPrev" type="button" aria-label="上一张">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="lb-nav next" id="lbNext" type="button" aria-label="下一张">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+    <button class="close" id="closeBtn" type="button" aria-label="关闭">×</button>
+  </div>
+
+<script>
+  const stage = document.getElementById('stage');
+  const bgm = document.getElementById('bgm');
+  const musicBtn = document.getElementById('musicBtn');
+  let musicStarted = false;
+  function startMusic() {
+    if (musicStarted || !bgm) return;
+    musicStarted = true;
+    if (bgm.readyState >= 1) {
+      try { bgm.currentTime = 10; } catch (err) {}
+    } else {
+      bgm.addEventListener('loadedmetadata', () => {
+        try { bgm.currentTime = 10; } catch (err) {}
+      }, { once: true });
+    }
+    const p = bgm.play();
+    if (p) p.catch(() => {
+      musicStarted = false;
+      const unlock = () => {
+        document.removeEventListener('pointerdown', unlock);
+        document.removeEventListener('touchstart', unlock);
+        bgm.play().then(() => {
+          musicStarted = true;
+          musicBtn.classList.add('playing');
+        }).catch(() => {});
+      };
+      document.addEventListener('pointerdown', unlock);
+      document.addEventListener('touchstart', unlock);
+    });
+    musicBtn.classList.add('playing');
+    window.setTimeout(() => {
+      try {
+        if (bgm.readyState >= 1 && bgm.currentTime < 10) bgm.currentTime = 10;
+      } catch (err) {}
+    }, 200);
+  }
+  function fadeBgm(target) {
+    const from = bgm.volume;
+    const start = performance.now();
+    const dur = 4000;
+    const step = (t) => {
+      const k = Math.min(1, (t - start) / dur);
+      bgm.volume = from + (target - from) * k;
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  function blowCandles() {
+    if (candlesBlown || !cakeSvg) return;
+    candlesBlown = true;
+    cakeSvg.classList.add('blown');
+    if (cakeScene) cakeScene.classList.add('bursting');
+    if (wishPrompt) wishPrompt.style.opacity = 0;
+    if (wishBurst) wishBurst.classList.add('show');
+    wishBurstOpen = true;
+    window.setTimeout(() => launchCakeConfetti(), 550);
+    if (burstParticles && burstParticles.children.length === 0) {
+      const colors = ['#ffd98a', '#ff8fa3', '#ffb37d', '#fff0d0', '#ffc3cf', '#ffe6a3'];
+      for (let i = 0; i < 56; i++) {
+        const p = document.createElement('span');
+        p.className = 'burst-p' + (i % 4 === 3 ? ' dot' : '');
+        const a = (i / 56) * Math.PI * 2 + Math.random() * 0.4;
+        const dist = 130 + Math.random() * 320;
+        p.style.setProperty('--tx', `${Math.cos(a) * dist}px`);
+        p.style.setProperty('--ty', `${Math.sin(a) * dist}px`);
+        p.style.setProperty('--c', colors[i % colors.length]);
+        p.style.setProperty('--s', `${12 + Math.random() * 14}px`);
+        if (i % 4 !== 3) p.textContent = ['♥', '✦', '✧'][i % 3];
+        p.style.animationDelay = `${Math.random() * 0.25}s`;
+        burstParticles.appendChild(p);
+      }
+    }
+    window.setTimeout(() => {
+      if (wishBurst) wishBurst.classList.remove('show');
+      if (cakeScene) cakeScene.classList.remove('bursting');
+      wishBurstOpen = false;
+    }, 3400);
+  }
+  function spawnTapSpark(x, y) {
+    const s = document.createElement('span');
+    s.className = 'tap-spark';
+    const glyphs = ['♥', '✦', '✧', '❤'];
+    s.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+    const colors = ['#ffd98a', '#ff8fa3', '#ffb37d', '#fff0d0'];
+    s.style.left = `${x}px`;
+    s.style.top = `${y}px`;
+    s.style.setProperty('--s', `${14 + Math.random() * 10}px`);
+    s.style.setProperty('--c', colors[Math.floor(Math.random() * colors.length)]);
+    document.body.appendChild(s);
+    window.setTimeout(() => s.remove(), 1200);
+  }
+  function launchCakeConfetti() {
+    const box = document.getElementById('cakeConfetti');
+    if (!box) return;
+    const colors = ['#ffd98a', '#ff8fa3', '#ffb37d', '#fff0d0', '#8fd3c7', '#ffc3cf'];
+    for (let i = 0; i < 30; i++) {
+      const c = document.createElement('i');
+      c.style.setProperty('--x', `${Math.random() * 100}%`);
+      c.style.setProperty('--d', `${Math.random() * 2}s`);
+      c.style.setProperty('--c', colors[i % colors.length]);
+      box.appendChild(c);
+      window.setTimeout(() => c.remove(), 4200);
+    }
+  }
+  const PHOTOS = Array.from({ length: 15 }, (_, i) => i + 1);
+  const thumb = (n) => `thumbs/${n}.jpg`;
+  const full = (n) => `view/${n}.jpg`;
+
+  const cakeStage = document.getElementById('cakeStage');
+  const cakeScene = document.getElementById('cakeScene');
+  const cakeSvg = document.getElementById('cakeSvg');
+  const wishPrompt = document.getElementById('wishPrompt');
+  const wishBurst = document.getElementById('wishBurst');
+  const burstParticles = document.getElementById('burstParticles');
+  let candlesBlown = false;
+  let wishBurstOpen = false;
+
+  const entryGate = document.getElementById('entryGate');
+  const gateCodes = [...document.querySelectorAll('#gateCodes .gate-code')];
+  const gateBtn = document.getElementById('gateBtn');
+  const gateError = document.getElementById('gateError');
+  let gateOpened = false;
+  function tryEnter() {
+    if (gateOpened) return;
+    if (gateCodes.map((i) => i.value).join('') === '0705') {
+      gateOpened = true;
+      entryGate.classList.add('hide');
+      startMusic();
+      musicBtn.classList.add('playing');
+    } else {
+      gateError.classList.add('show');
+      gateCodes.forEach((i) => { i.value = ''; });
+      gateCodes[0].focus();
+    }
+  }
+  gateBtn.addEventListener('click', tryEnter);
+  gateBtn.addEventListener('touchstart', tryEnter, { passive: true });
+  gateCodes.forEach((input, idx) => {
+    input.addEventListener('input', () => {
+      gateError.classList.remove('show');
+      if (input.value && idx < 3) gateCodes[idx + 1].focus();
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') tryEnter();
+      if (e.key === 'Backspace' && !input.value && idx > 0) gateCodes[idx - 1].focus();
+    });
+  });
+  const sparkColors = ['#ffe1a3', '#ffd98a', '#ffc3cf', '#fff4d6', '#ffb37d'];
+  for (let i = 0; i < 16; i++) {
+    const s = document.createElement('span');
+    s.className = 'spark';
+    s.style.setProperty('--x', `${8 + Math.random() * 84}%`);
+    s.style.setProperty('--y', `${10 + Math.random() * 78}%`);
+    s.style.setProperty('--s', `${4 + Math.random() * 6}px`);
+    s.style.setProperty('--d', `${1.6 + Math.random() * 2.4}s`);
+    s.style.background = sparkColors[i % sparkColors.length];
+    cakeStage.appendChild(s);
+  }
+  function createCakeVortex() {
+    const box = document.getElementById('cakeVortex');
+    if (!box) return;
+    const colors = ['#ffd98a', '#ffc3cf', '#ffe6a3', '#ffb37d'];
+    for (let i = 0; i < 26; i++) {
+      const s = document.createElement('span');
+      s.className = 'vortex-star';
+      const a = (i / 26) * 360;
+      const r = 150 + (i % 3) * 55;
+      s.style.transform = `rotate(${a}deg) translateX(${r}px)`;
+      s.style.setProperty('--c', colors[i % colors.length]);
+      box.appendChild(s);
+    }
+  }
+  createCakeVortex();
+
+  const hearts = document.getElementById('hearts');
+  for (let i = 0; i < 10; i++) {
+    const h = document.createElement('span');
+    h.className = 'heart';
+    h.textContent = '♥';
+    const angle = (i / 10) * Math.PI * 2;
+    const dist = 120 + (i % 3) * 50;
+    h.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+    h.style.setProperty('--ty', `${Math.sin(angle) * dist - 30}px`);
+    h.style.setProperty('--d', `${i * 0.08}s`);
+    hearts.appendChild(h);
+  }
+
+  const confetti = document.getElementById('confetti');
+  const confettiColors = ['#ffd98a', '#ff8fa3', '#ffb37d', '#fff0d0', '#8fd3c7', '#ffc3cf'];
+  for (let i = 0; i < 22; i++) {
+    const c = document.createElement('i');
+    c.style.setProperty('--x', `${Math.random() * 100}%`);
+    c.style.setProperty('--d', `${Math.random() * 3}s`);
+    c.style.setProperty('--c', confettiColors[i % confettiColors.length]);
+    confetti.appendChild(c);
+  }
+
+  const cakeCanvas = null;
+  let cakeParticles = [];
+  let cakeCtx = null;
+  let cakeSize = 0;
+  let cakeDPR = 1;
+
+  function shade(base, amt) {
+    return [
+      Math.max(0, Math.min(255, Math.round(base[0] + amt))),
+      Math.max(0, Math.min(255, Math.round(base[1] + amt))),
+      Math.max(0, Math.min(255, Math.round(base[2] + amt)))
+    ];
+  }
+  function fillCylinder(list, radius, yTop, yBottom, palette, count) {
+    for (let i = 0; i < count; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const rr = Math.sqrt(Math.random()) * radius;
+      const y = yBottom + Math.random() * (yTop - yBottom);
+      const base = palette[Math.floor(Math.random() * palette.length)];
+      list.push({
+        x: Math.cos(a) * rr,
+        y,
+        z: Math.sin(a) * rr,
+        r: 2.1,
+        c: shade(base, Math.floor(Math.random() * 22) - 11),
+        a: 0.85,
+        tw: 0,
+        frontOnly: false,
+        rad: 0
+      });
+    }
+  }
+  function makeCakeParticles() {
+    const parts = [];
+    const mobile = window.innerWidth < 760;
+    const s = mobile ? 0.55 : 1;
+    fillCylinder(parts, 150, -70, 30, [[255, 201, 218], [246, 173, 198], [224, 127, 159]], Math.round(900 * s));
+    fillCylinder(parts, 112, 30, 110, [[255, 236, 196], [242, 205, 143], [220, 171, 99]], Math.round(720 * s));
+    fillCylinder(parts, 74, 110, 182, [[255, 214, 228], [243, 169, 196], [222, 125, 164]], Math.round(520 * s));
+    for (let i = 0; i < Math.round(320 * s); i++) {
+      const a = Math.random() * Math.PI * 2;
+      const rr = Math.sqrt(Math.random()) * 190;
+      parts.push({
+        x: Math.cos(a) * rr, y: 40, z: Math.sin(a) * rr, r: 2.0,
+        c: shade([250, 244, 230], Math.floor(Math.random() * 24) - 12),
+        a: 0.7, tw: 0, frontOnly: false, rad: 0
+      });
+    }
+    const candleColors = [[255, 159, 122], [255, 217, 138], [255, 143, 163]];
+    [-34, 0, 34].forEach((cx, ci) => {
+      const base = candleColors[ci];
+      for (let i = 0; i < Math.round(70 * s); i++) {
+        const a = Math.random() * Math.PI * 2;
+        const rr = Math.sqrt(Math.random()) * 9;
+        parts.push({
+          x: cx + Math.cos(a) * rr,
+          y: 182 + Math.random() * 64,
+          z: Math.sin(a) * rr,
+          r: 1.7,
+          c: shade(base, Math.floor(Math.random() * 18) - 9),
+          a: 0.9, tw: 0, frontOnly: false, rad: 0
+        });
+      }
+      for (let i = 0; i < Math.round(34 * s); i++) {
+        const a = Math.random() * Math.PI * 2;
+        const rr = Math.random() * 6;
+        parts.push({
+          x: cx + Math.cos(a) * rr * 0.7,
+          y: 250 + Math.random() * 18,
+          z: Math.sin(a) * rr * 0.7,
+          r: 1.7,
+          c: [255, 222, 120],
+          a: 0.95,
+          tw: Math.random() * 6.28,
+          frontOnly: false,
+          rad: 0
+        });
+      }
+    });
+    const tmp = document.createElement('canvas');
+    tmp.width = 420;
+    tmp.height = 220;
+    const tc = tmp.getContext('2d');
+    tc.font = '800 150px Georgia, "Times New Roman", serif';
+    tc.textAlign = 'center';
+    tc.textBaseline = 'middle';
+    tc.fillStyle = '#fff';
+    tc.fillText('22', 210, 118);
+    const data = tc.getImageData(0, 0, 420, 220).data;
+    const gold = [[255, 214, 140], [255, 232, 180], [240, 190, 90]];
+    let count = 0;
+    for (let py = 0; py < 220 && count < 260; py += 4) {
+      for (let px = 0; px < 420; px += 4) {
+        if (data[(py * 420 + px) * 4 + 3] > 120) {
+          const x = (px / 420 - 0.5) * 170;
+          const y = 70 + (py / 220 - 0.5) * 90;
+          const base = gold[Math.floor(Math.random() * gold.length)];
+          parts.push({
+            x, y, z: 113.5, r: 2.4,
+            c: shade(base, Math.floor(Math.random() * 18) - 9),
+            a: 0.98, tw: 0, frontOnly: true, rad: 112
+          });
+          count++;
+        }
+      }
+    }
+    for (let i = 0; i < Math.round(120 * s); i++) {
+      const a = Math.random() * Math.PI * 2;
+      const rr = Math.random() * 3;
+      parts.push({
+        x: Math.cos(a) * rr,
+        y: Math.random() * 80 - 40,
+        z: Math.sin(a) * rr,
+        r: 1.4,
+        c: [255, 240, 200],
+        a: 0.35,
+        tw: Math.random() * 6.28,
+        frontOnly: false,
+        rad: 0
+      });
+    }
+    return parts;
+  }
+  function resizeCake() {
+    if (!cakeCanvas) return;
+    cakeDPR = window.devicePixelRatio || 1;
+    const rect = cakeCanvas.getBoundingClientRect();
+    cakeSize = Math.max(100, Math.min(rect.width, rect.height));
+    cakeCanvas.width = Math.round(cakeSize * cakeDPR);
+    cakeCanvas.height = Math.round(cakeSize * cakeDPR);
+    cakeCtx = cakeCanvas.getContext('2d');
+    cakeCtx.setTransform(cakeDPR, 0, 0, cakeDPR, 0, 0);
+  }
+  function drawCake(now) {
+    if (!cakeCtx || cakeSize < 1) return;
+    const t = now / 1000;
+    const ang = t * 0.55;
+    const tilt = -0.3;
+    const cosA = Math.cos(ang), sinA = Math.sin(ang);
+    const cosT = Math.cos(tilt), sinT = Math.sin(tilt);
+    const cx = cakeSize / 2, cy = cakeSize / 2;
+    const unit = cakeSize / 460;
+    const FOV = 900 * unit;
+    const parts = cakeParticles;
+    const order = parts.map((_, i) => i);
+    const depths = new Float32Array(parts.length);
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i];
+      const xr = p.x * cosA + p.z * sinA;
+      const zr = -p.x * sinA + p.z * cosA;
+      const yr = p.y * cosT - zr * sinT;
+      const z2 = p.y * sinT + zr * cosT;
+      p._xr = xr; p._yr = yr; p._z2 = z2;
+      depths[i] = z2;
+    }
+    order.sort((a, b) => depths[b] - depths[a]);
+    cakeCtx.clearRect(0, 0, cakeSize, cakeSize);
+    for (let i = 0; i < order.length; i++) {
+      const p = parts[order[i]];
+      const persp = FOV / (FOV + p._z2);
+      const sx = cx + p._xr * persp * unit;
+      const sy = cy - p._yr * persp * unit;
+      let alpha = p.a;
+      if (p.frontOnly && p.rad) alpha *= Math.max(0.05, p._xr / p.rad);
+      if (p.tw) alpha *= 0.55 + 0.45 * Math.sin(t * 3 + p.tw);
+      const sz = Math.max(0.4, p.r * persp * unit);
+      cakeCtx.beginPath();
+      cakeCtx.arc(sx, sy, sz, 0, Math.PI * 2);
+      cakeCtx.fillStyle = `rgba(${p.c[0]},${p.c[1]},${p.c[2]},${Math.min(1, Math.max(0, alpha))})`;
+      cakeCtx.fill();
+    }
+    requestAnimationFrame(drawCake);
+  }
+  function startCake() {
+    cakeParticles = makeCakeParticles();
+    resizeCake();
+    requestAnimationFrame(drawCake);
+  }
+  window.addEventListener('resize', resizeCake);
+  startCake();
+
+  function createFloatingHearts(container, count) {
+    const heartColors = ['#ff8fa3', '#ffb3c1', '#ffd98a', '#ff7c9c', '#ffc3cf'];
+    for (let i = 0; i < count; i++) {
+      const h = document.createElement('span');
+      h.className = 'heart-float';
+      h.textContent = '♥';
+      h.style.setProperty('--x', `${Math.random() * 100}%`);
+      h.style.setProperty('--hs', `${16 + Math.random() * 22}px`);
+      h.style.setProperty('--hd', `${7 + Math.random() * 8}s`);
+      h.style.setProperty('--hd2', `${-Math.random() * 12}s`);
+      h.style.setProperty('--ho', `${0.22 + Math.random() * 0.34}`);
+      h.style.setProperty('--hc', heartColors[i % heartColors.length]);
+      h.style.setProperty('--sw', `${(Math.random() * 70 - 35).toFixed(1)}px`);
+      container.appendChild(h);
+    }
+  }
+  createFloatingHearts(document.getElementById('floatingHearts'), 16);
+  createFloatingHearts(document.getElementById('letterHearts'), 20);
+
+  const voiceBtn = document.getElementById('voiceBtn');
+  const voiceLabel = document.getElementById('voiceLabel');
+  const voiceMsg = document.getElementById('voiceMsg');
+  const endingHeart = document.getElementById('endingHeart');
+  const endingMessage = document.getElementById('endingMessage');
+  const endingHint = document.getElementById('endingHint');
+  const endingStars = document.getElementById('endingStars');
+  const endingFireworks = document.getElementById('endingFireworks');
+  const endingHeartRain = document.getElementById('endingHeartRain');
+
+  if (endingStars) {
+    const starColors = ['#ffd98a', '#ff8fa3', '#ffb37d', '#fff0d0', '#ffe6a3'];
+    for (let i = 0; i < 26; i++) {
+      const st = document.createElement('span');
+      st.className = 'ending-star';
+      st.textContent = ['✦', '✧', '♥'][i % 3];
+      st.style.setProperty('--x', `${Math.random() * 100}%`);
+      st.style.setProperty('--s', `${12 + Math.random() * 12}px`);
+      st.style.setProperty('--c', starColors[i % starColors.length]);
+      st.style.setProperty('--d', `${6 + Math.random() * 6}s`);
+      st.style.setProperty('--delay', `${-Math.random() * 8}s`);
+      endingStars.appendChild(st);
+    }
+  }
+  if (endingHeartRain) {
+    const heartRainColors = ['#ff8fa3', '#ffb3c1', '#ffd98a', '#ff7c9c', '#ffc3cf'];
+    for (let i = 0; i < 22; i++) {
+      const h = document.createElement('span');
+      h.className = 'rain-heart';
+      h.textContent = '♥';
+      h.style.setProperty('--x', `${Math.random() * 100}%`);
+      h.style.setProperty('--s', `${16 + Math.random() * 18}px`);
+      h.style.setProperty('--c', heartRainColors[i % heartRainColors.length]);
+      h.style.setProperty('--d', `${7 + Math.random() * 6}s`);
+      h.style.setProperty('--delay', `${-Math.random() * 9}s`);
+      endingHeartRain.appendChild(h);
+    }
+  }
+
+  const letterLines = [...document.querySelectorAll('.letter-line')];
+  const letterSign = document.querySelector('.letter-sign');
+  const letterTexts = letterLines.map((l) => l.textContent);
+  let letterTimer = null;
+  let letterFast = false;
+  let letterDone = false;
+  function startLetterTyping() {
+    if (letterTimer) clearTimeout(letterTimer);
+    letterFast = false;
+    letterDone = false;
+    letterLines.forEach((l) => {
+      l.textContent = '';
+      l.classList.remove('typing');
+    });
+    if (letterSign) letterSign.style.opacity = 0;
+    let li = 0;
+    let ci = 0;
+    const step = () => {
+      if (li >= letterLines.length) {
+        if (letterSign) letterSign.style.opacity = 1;
+        letterDone = true;
+        return;
+      }
+      const line = letterLines[li];
+      const full = letterTexts[li];
+      if (ci < full.length) {
+        line.textContent = full.slice(0, ci + 1);
+        line.classList.add('typing');
+        ci += 1;
+        letterTimer = setTimeout(step, letterFast ? 12 : 85);
+      } else {
+        line.classList.remove('typing');
+        ci = 0;
+        li += 1;
+        letterTimer = setTimeout(step, letterFast ? 60 : 420);
+      }
+    };
+    letterTimer = setTimeout(step, 350);
+  }
+  function speedUpLetterTyping() {
+    letterFast = true;
+  }
+
+  const rotations = [-3.2, 2.4, -1.6, 3, -2.1, 1.8, -3, 2.6, -2.4, 1.9, -2, 1.5, -2.8, 3.2, -1.4];
+  const shifts = [0, 7, -5, 8, 2, -7, 6, -4, 9, -6, 3, -8, 5, 7, -3];
+  const photoPage1 = document.getElementById('photoPage1');
+  const photoPage2 = document.getElementById('photoPage2');
+  const pagePrevBtn = document.getElementById('pagePrevBtn');
+  const pageNextBtn = document.getElementById('pageNextBtn');
+  const pageDots = document.getElementById('pageDots');
+  const pageCount = document.getElementById('pageCount');
+  const hintText = document.getElementById('hintText');
+  let photoPage = 0;
+
+  function renderPhotos(container, list, baseIndex) {
+    container.innerHTML = list.map((n, i) => `
+      <button class="photo" type="button" data-index="${baseIndex + i}" data-full="${full(n)}"
+        style="--i:${i};--r:${rotations[i]}deg;--t:${shifts[i]}px"
+        aria-label="照片 ${n}">
+        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="lazy"></span>
+      </button>`).join('');
+  }
+  renderPhotos(photoPage1, PHOTOS.slice(0, 8), 0);
+  renderPhotos(photoPage2, PHOTOS.slice(8), 8);
+
+  function showPhotoPage(next) {
+    photoPage = next;
+    photoPage1.classList.toggle('hidden', next !== 0);
+    photoPage2.classList.toggle('hidden', next !== 1);
+    pagePrevBtn.disabled = next === 0;
+    pageNextBtn.disabled = next === 1;
+    pageCount.textContent = `${next + 1} / 2`;
+    pageDots.innerHTML = PHOTOS.slice(0, 2).map((_, i) =>
+      `<button class="page-dot${i === next ? ' active' : ''}" data-page="${i}" type="button" aria-label="第 ${i + 1} 页"></button>`
+    ).join('');
+  }
+  showPhotoPage(0);
+
+  const sceneNames = ['greeting', 'cake', 'letter', 'photos', 'ending'];
+  let scene = 0;
+  function setScene(next) {
+    scene = next;
+    stage.classList.remove(...sceneNames.map((n) => 'scene-' + n));
+    stage.classList.add('scene-' + sceneNames[scene]);
+    hintText.classList.remove('show');
+    if (next === 0) {
+      hintText.textContent = '开启礼物';
+      candlesBlown = false;
+      wishBurstOpen = false;
+      if (cakeSvg) cakeSvg.classList.remove('blown');
+      if (cakeScene) cakeScene.classList.remove('bursting');
+      if (wishPrompt) wishPrompt.style.opacity = '';
+      if (wishBurst) wishBurst.classList.remove('show');
+    } else if (next === 1) {
+      hintText.textContent = candlesBlown ? '轻触屏幕继续' : '许愿 · 点击蜡烛吹灭';
+    } else if (next === 2) {
+      hintText.textContent = '轻触屏幕继续';
+    } else {
+      hintText.textContent = '轻触屏幕';
+    }
+    if (scene === 2) startLetterTyping();
+    if (scene === 3) showPhotoPage(0);
+    if (next === 4) fadeBgm(0.12);
+    else fadeBgm(1);
+  }
+
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  let lightboxIndex = 0;
+  function openLightboxAt(i) {
+    lightboxIndex = (i + PHOTOS.length) % PHOTOS.length;
+    lightboxImg.onload = () => {
+      if (lightbox.classList.contains('open')) lightbox.classList.remove('loading');
+    };
+    lightboxImg.onerror = () => {
+      lightboxImg.onload = null;
+      lightboxImg.onerror = null;
+      if (!lightbox.classList.contains('open')) return;
+      lightboxImg.src = thumb(PHOTOS[lightboxIndex]);
+      lightboxImg.onload = () => lightbox.classList.remove('loading');
+    };
+    lightbox.classList.add('open', 'loading');
+    lightboxImg.src = full(PHOTOS[lightboxIndex]);
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('open', 'loading');
+    lightboxImg.onload = null;
+    lightboxImg.onerror = null;
+    lightboxImg.src = '';
+  }
+
+  [photoPage1, photoPage2].forEach((page) => {
+    page.addEventListener('click', (e) => {
+      const card = e.target.closest('.photo');
+      if (card) openLightboxAt(Number(card.dataset.index));
+    });
+  });
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox || e.target.closest('.close')) closeLightbox();
+  });
+  document.getElementById('lbPrev').addEventListener('click', (e) => {
+    e.stopPropagation();
+    openLightboxAt(lightboxIndex - 1);
+  });
+  document.getElementById('lbNext').addEventListener('click', (e) => {
+    e.stopPropagation();
+    openLightboxAt(lightboxIndex + 1);
+  });
+
+  pagePrevBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showPhotoPage(0);
+  });
+  pageNextBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showPhotoPage(1);
+  });
+  pageDots.addEventListener('click', (e) => {
+    const dot = e.target.closest('.page-dot');
+    if (dot) showPhotoPage(Number(dot.dataset.page));
+  });
+
+  document.getElementById('replayBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    setScene(0);
+  });
+
+  document.getElementById('endBackBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    setScene(0);
+  });
+
+  const isMobile = window.matchMedia('(max-width: 760px)').matches || 'ontouchstart' in window;
+  function duckBgm() {
+    bgm.volume = 0.12;
+    if (!isMobile) {
+      window.setTimeout(() => {
+        if (musicBtn.classList.contains('playing') && bgm.paused) {
+          bgm.play().catch(() => {});
+        }
+      }, 120);
+    }
+  }
+  function resumeBgmIfNeeded() {
+    bgm.volume = 1;
+    if (musicBtn.classList.contains('playing') && bgm.paused) {
+      bgm.play().catch(() => {});
+    }
+  }
+  voiceBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (voiceMsg.paused) {
+      duckBgm();
+      voiceMsg.play().catch(() => {});
+      voiceLabel.textContent = '暂停留言';
+    } else {
+      voiceMsg.pause();
+      voiceLabel.textContent = '播放我的留言';
+    }
+  });
+  voiceMsg.addEventListener('play', duckBgm);
+  voiceMsg.addEventListener('pause', () => {
+    voiceLabel.textContent = voiceMsg.ended ? '再听一遍' : '播放我的留言';
+    resumeBgmIfNeeded();
+  });
+  voiceMsg.addEventListener('ended', () => {
+    voiceLabel.textContent = '再听一遍';
+    resumeBgmIfNeeded();
+  });
+  endingHeart.addEventListener('click', (e) => {
+    e.stopPropagation();
+    heartClickCount += 1;
+    if (heartClickCount >= 3) {
+      heartClickCount = 0;
+      launchEndingFireworks();
+    }
+    const show = !endingMessage.classList.contains('show');
+    endingMessage.classList.toggle('show', show);
+    if (endingHint) endingHint.style.opacity = show ? 0 : 1;
+  });
+  let heartClickCount = 0;
+  function fireworkRound(palette, delay) {
+    window.setTimeout(() => {
+      if (!endingFireworks) return;
+      for (let i = 0; i < 36; i++) {
+        const p = document.createElement('span');
+        p.className = 'burst-p' + (i % 4 === 3 ? ' dot' : '');
+        const a = (i / 36) * Math.PI * 2 + Math.random() * 0.3;
+        const dist = 140 + Math.random() * 300;
+        p.style.setProperty('--tx', `${Math.cos(a) * dist}px`);
+        p.style.setProperty('--ty', `${Math.sin(a) * dist}px`);
+        p.style.setProperty('--c', palette[i % palette.length]);
+        p.style.setProperty('--s', `${12 + Math.random() * 14}px`);
+        if (i % 4 !== 3) p.textContent = ['♥', '✦', '✧'][i % 3];
+        p.style.animationDelay = `${Math.random() * 0.15}s`;
+        endingFireworks.appendChild(p);
+        window.setTimeout(() => p.remove(), 1900);
+      }
+      const ring = document.createElement('span');
+      ring.className = 'burst-ring';
+      ring.style.setProperty('--c', palette[0]);
+      endingFireworks.appendChild(ring);
+      window.setTimeout(() => ring.remove(), 1300);
+    }, delay);
+  }
+  function launchEndingFireworks() {
+    fireworkRound(['#ffd98a', '#ff8fa3', '#ffb37d', '#fff0d0'], 0);
+    fireworkRound(['#ff8fa3', '#ffc3cf', '#ffb37d', '#ffe6a3'], 700);
+    fireworkRound(['#ffe6a3', '#ffd98a', '#ffc3cf', '#fff0d0'], 1400);
+  }
+
+  musicBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (bgm.paused) {
+      if (musicStarted) {
+        bgm.play().catch(() => {});
+        musicBtn.classList.add('playing');
+      } else {
+        startMusic();
+      }
+    } else {
+      bgm.pause();
+      musicBtn.classList.remove('playing');
+    }
+  });
+
+  stage.addEventListener('click', (e) => {
+    startMusic();
+    spawnTapSpark(e.clientX, e.clientY);
+    if (e.target.closest('.replay, .photo, .page-arrow, .page-dot')) return;
+    if (scene === 0) setScene(1);
+    else if (scene === 1) {
+      if (!candlesBlown) blowCandles();
+      else if (!wishBurstOpen) setScene(2);
+    }
+    else if (scene === 2) {
+      if (!letterDone) speedUpLetterTyping();
+      else setScene(3);
+    }
+    else if (scene === 3 && photoPage === 0) showPhotoPage(1);
+    else if (scene === 3 && photoPage === 1) setScene(4);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeLightbox();
+      return;
+    }
+    if (lightbox.classList.contains('open')) {
+      if (e.key === 'ArrowLeft') openLightboxAt(lightboxIndex - 1);
+      if (e.key === 'ArrowRight') openLightboxAt(lightboxIndex + 1);
+      return;
+    }
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (scene === 0) setScene(1);
+      else if (scene === 1) {
+        if (!candlesBlown) blowCandles();
+        else if (!wishBurstOpen) setScene(2);
+      }
+      else if (scene === 2) {
+        if (!letterDone) speedUpLetterTyping();
+        else setScene(3);
+      }
+      else if (scene === 3 && photoPage === 0) showPhotoPage(1);
+      else if (scene === 3 && photoPage === 1) setScene(4);
+    }
+  });
+</script>
+</body>
+</html>
