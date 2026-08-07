@@ -1335,8 +1335,8 @@
       <p class="gate-error" id="gateError">密码不对哦，再想想</p>
     </div>
   </div>
-  <audio id="bgm" src="Celebrate-Red%20Velvet.mp3" loop preload="auto"></audio>
-  <audio id="voiceMsg" src="录音机-20260806-1534..m4a" preload="auto"></audio>
+  <audio id="bgm" src="Celebrate-Red%20Velvet.mp3" loop preload="metadata"></audio>
+  <audio id="voiceMsg" src="录音机-20260806-1534..m4a" preload="none"></audio>
   <div class="stage scene-greeting" id="stage">
     <button class="music-btn" id="musicBtn" type="button" title="播放音乐" aria-label="播放音乐">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
@@ -1737,44 +1737,38 @@
   function startMusic() {
     if (musicStarted || !bgm) return;
     musicStarted = true;
-    if (bgm.readyState >= 1) {
-      try { bgm.currentTime = 10; } catch (err) {}
-    } else {
-      bgm.addEventListener('loadedmetadata', () => {
-        try { bgm.currentTime = 10; } catch (err) {}
-      }, { once: true });
-    }
     const p = bgm.play();
-    if (p) p.catch(() => {
-      musicStarted = false;
-      const unlock = () => {
-        document.removeEventListener('pointerdown', unlock);
-        document.removeEventListener('touchstart', unlock);
-        bgm.play().then(() => {
-          musicStarted = true;
-          musicBtn.classList.add('playing');
-        }).catch(() => {});
-      };
-      document.addEventListener('pointerdown', unlock);
-      document.addEventListener('touchstart', unlock);
-    });
-    musicBtn.classList.add('playing');
-    window.setTimeout(() => {
-      try {
-        if (bgm.readyState >= 1 && bgm.currentTime < 10) bgm.currentTime = 10;
-      } catch (err) {}
-    }, 200);
+    if (p) {
+      p.then(() => musicBtn.classList.add('playing')).catch(() => {
+        musicStarted = false;
+        const unlock = () => {
+          document.removeEventListener('pointerdown', unlock);
+          document.removeEventListener('touchstart', unlock);
+          bgm.play().then(() => {
+            musicStarted = true;
+            musicBtn.classList.add('playing');
+          }).catch(() => {});
+        };
+        document.addEventListener('pointerdown', unlock);
+        document.addEventListener('touchstart', unlock);
+      });
+    } else {
+      musicBtn.classList.add('playing');
+    }
   }
+  let bgmFadeRaf = null;
   function fadeBgm(target) {
+    if (bgmFadeRaf) cancelAnimationFrame(bgmFadeRaf);
     const from = bgm.volume;
     const start = performance.now();
     const dur = 4000;
     const step = (t) => {
       const k = Math.min(1, (t - start) / dur);
       bgm.volume = from + (target - from) * k;
-      if (k < 1) requestAnimationFrame(step);
+      if (k < 1) bgmFadeRaf = requestAnimationFrame(step);
+      else bgmFadeRaf = null;
     };
-    requestAnimationFrame(step);
+    bgmFadeRaf = requestAnimationFrame(step);
   }
   function blowCandles() {
     if (candlesBlown || !cakeSvg) return;
@@ -1903,10 +1897,8 @@
     if (gateOpened) return;
     if (gateCodes.map((i) => i.value).join('') === '0705') {
       gateOpened = true;
-      preloadThumbs();
       entryGate.classList.add('hide');
       startMusic();
-      musicBtn.classList.add('playing');
     } else {
       gateError.classList.add('show');
       gateCodes.forEach((i) => { i.value = ''; });
@@ -2315,7 +2307,10 @@
       hintText.textContent = '轻触屏幕';
     }
     if (scene === 2) startLetterTyping();
-    if (scene === 3) showPhotoPage(0);
+    if (scene === 3) {
+      preloadThumbs();
+      showPhotoPage(0);
+    }
     if (next === 4) fadeBgm(0.12);
     else fadeBgm(1);
   }
@@ -2323,20 +2318,25 @@
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
   let lightboxIndex = 0;
-  function openLightboxAt(i) {
-    lightboxIndex = (i + PHOTOS.length) % PHOTOS.length;
+  function loadLightboxPhoto(i, step) {
+    const paths = [lightboxSrc(i), full(i), thumb(i)];
     lightboxImg.onload = () => {
-      if (lightbox.classList.contains('open')) lightbox.classList.remove('loading');
+      lightboxImg.onerror = null;
+      lightbox.classList.remove('loading');
     };
     lightboxImg.onerror = () => {
-      lightboxImg.onload = null;
-      lightboxImg.onerror = null;
-      if (!lightbox.classList.contains('open')) return;
-      lightboxImg.src = thumb(PHOTOS[lightboxIndex]);
-      lightboxImg.onload = () => lightbox.classList.remove('loading');
+      if (step + 1 < paths.length) loadLightboxPhoto(i, step + 1);
+      else {
+        lightboxImg.onerror = null;
+        lightbox.classList.remove('loading');
+      }
     };
+    lightboxImg.src = paths[step];
+  }
+  function openLightboxAt(i) {
+    lightboxIndex = (i + PHOTOS.length) % PHOTOS.length;
     lightbox.classList.add('open', 'loading');
-    lightboxImg.src = lightboxSrc(PHOTOS[lightboxIndex]);
+    loadLightboxPhoto(PHOTOS[lightboxIndex], 0);
     preloadLightbox(lightboxIndex);
   }
   function closeLightbox() {
@@ -2478,6 +2478,11 @@
     } else {
       bgm.pause();
       musicBtn.classList.remove('playing');
+    }
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && musicBtn.classList.contains('playing') && bgm.paused) {
+      bgm.play().catch(() => {});
     }
   });
 
