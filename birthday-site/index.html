@@ -684,6 +684,11 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    opacity: 0;
+    transition: opacity .35s ease;
+  }
+  .pic img.loaded {
+    opacity: 1;
   }
 
   .replay {
@@ -1335,8 +1340,8 @@
       <p class="gate-error" id="gateError">密码不对哦，再想想</p>
     </div>
   </div>
-  <audio id="bgm" src="Celebrate-Red%20Velvet.mp3" loop preload="metadata"></audio>
-  <audio id="voiceMsg" src="voice-message.mp3" preload="none"></audio>
+  <audio id="bgm" src="Celebrate-Red%20Velvet.mp3" loop preload="auto"></audio>
+  <audio id="voiceMsg" src="voice-message.mp3" preload="auto"></audio>
   <div class="stage scene-greeting" id="stage">
     <button class="music-btn" id="musicBtn" type="button" title="播放音乐" aria-label="播放音乐">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
@@ -2272,21 +2277,15 @@
         aria-label="照片 ${n}">
         <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="lazy"></span>
       </button>`).join('');
+    container.querySelectorAll('img').forEach((img) => {
+      const mark = () => img.classList.add('loaded');
+      if (img.complete && img.naturalWidth > 0) mark();
+      else img.addEventListener('load', mark, { once: true });
+    });
   }
   renderPhotos(photoPage1, PHOTOS.slice(0, 8), 0);
   renderPhotos(photoPage2, PHOTOS.slice(8), 8);
 
-  function ensurePhotosLoaded(container) {
-    const imgs = [...container.querySelectorAll('img')];
-    imgs.forEach((img) => { img.loading = 'eager'; });
-    return Promise.all(imgs.map((img) => {
-      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-      return new Promise((resolve) => {
-        img.addEventListener('load', resolve, { once: true });
-        img.addEventListener('error', resolve, { once: true });
-      });
-    }));
-  }
   function applyPhotoPage(next) {
     photoPage = next;
     photoPage1.classList.toggle('hidden', next !== 0);
@@ -2299,12 +2298,8 @@
     ).join('');
   }
   function showPhotoPage(next) {
-    if (next === 1) {
-      preloadThumbs(1);
-      ensurePhotosLoaded(photoPage2).then(() => applyPhotoPage(1)).catch(() => applyPhotoPage(1));
-    } else {
-      applyPhotoPage(next);
-    }
+    preloadThumbs(next);
+    applyPhotoPage(next);
   }
   showPhotoPage(0);
 
