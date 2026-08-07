@@ -305,6 +305,61 @@
   }
   .scene-cake.bursting .beam,
   .scene-cake.bursting .wish-prompt { opacity: 0; }
+  .scene-cake.wished {
+    background:
+      radial-gradient(circle at 50% 46%, rgba(255, 208, 128, .13), transparent 48%),
+      linear-gradient(180deg, rgba(255, 214, 150, .055), transparent 42%),
+      linear-gradient(155deg, #341420 0%, #251019 48%, #160b0f 100%);
+  }
+  .scene-cake.wished .beam { opacity: 1; }
+  .scene-cake.wished #cakeSvg {
+    filter: drop-shadow(0 24px 26px rgba(20, 5, 10, .42)) drop-shadow(0 0 30px rgba(255, 200, 110, .34));
+  }
+  .scene-cake.wished .cake-float { animation-duration: 4.6s; }
+  .scene-cake.wished .cake-3d { animation-duration: 7s; }
+  .wish-embrace {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .scene-cake.wished .wish-embrace { opacity: 1; }
+  .wish-aura {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(92vw, 820px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%) scale(.94);
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 52%, transparent 34%, rgba(255, 208, 128, .10) 52%, rgba(255, 172, 92, .2) 66%, transparent 78%);
+    filter: blur(2px);
+    animation: aura-breathe 4.2s ease-in-out infinite;
+  }
+  .wish-ember,
+  .wish-star {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    opacity: 0;
+  }
+  .wish-ember {
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: 0 0 10px var(--c);
+    animation: ember-rise var(--d) ease-out var(--delay) infinite;
+  }
+  .wish-star {
+    font-size: var(--s);
+    line-height: 1;
+    color: var(--c);
+    text-shadow: 0 0 12px var(--c);
+    animation: star-float var(--d) ease-out var(--delay) infinite;
+  }
   .wish-burst {
     position: absolute;
     inset: 0;
@@ -393,6 +448,21 @@
   @keyframes burst-fly {
     0% { opacity: 1; transform: translate(0, 0) scale(1); }
     100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(.4); }
+  }
+  @keyframes aura-breathe {
+    0%, 100% { opacity: .6; transform: translate(-50%, -50%) scale(.94); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.02); }
+  }
+  @keyframes ember-rise {
+    0% { opacity: 0; transform: translate(0, 0) scale(.4); }
+    16% { opacity: .95; }
+    100% { opacity: 0; transform: translate(var(--sway), -48vh) scale(1); }
+  }
+  @keyframes star-float {
+    0% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(.4); }
+    20% { opacity: 1; }
+    80% { opacity: .7; }
+    100% { opacity: 0; transform: translate(var(--sway), -54vh) rotate(90deg) scale(1.05); }
   }
   .flame {
     transform-origin: 50% 100%;
@@ -1575,6 +1645,7 @@
           </div>
         </div>
       </div>
+      <div class="wish-embrace" id="wishEmbrace" aria-hidden="true"></div>
       <div class="wish-prompt" id="wishPrompt">许个愿吧 · 点击蜡烛吹灭</div>
       <div class="wish-burst" id="wishBurst" aria-hidden="true">
         <div class="wish-flash"></div>
@@ -1730,11 +1801,43 @@
         burstParticles.appendChild(p);
       }
     }
+    createWishGlow();
     window.setTimeout(() => {
       if (wishBurst) wishBurst.classList.remove('show');
-      if (cakeScene) cakeScene.classList.remove('bursting');
+      if (cakeScene) {
+        cakeScene.classList.remove('bursting');
+        cakeScene.classList.add('wished');
+      }
       wishBurstOpen = false;
     }, 3400);
+  }
+  function resetWishGlow() {
+    const box = document.getElementById('wishEmbrace');
+    if (!box) return;
+    box.innerHTML = '';
+    delete box.dataset.ready;
+  }
+  function createWishGlow() {
+    const box = document.getElementById('wishEmbrace');
+    if (!box || box.dataset.ready) return;
+    box.dataset.ready = '1';
+    const aura = document.createElement('div');
+    aura.className = 'wish-aura';
+    box.appendChild(aura);
+    const colors = ['#ffe6a3', '#ffd98a', '#ffc3cf', '#8fd3c7', '#fff0d0', '#ffb37d'];
+    for (let i = 0; i < 18; i++) {
+      const s = document.createElement('span');
+      s.className = i % 4 === 0 ? 'wish-star' : 'wish-ember';
+      s.style.setProperty('--x', `${12 + Math.random() * 76}%`);
+      s.style.setProperty('--y', `${46 + Math.random() * 24}%`);
+      s.style.setProperty('--s', `${(i % 4 === 0 ? 13 : 6) + Math.random() * 7}px`);
+      s.style.setProperty('--c', colors[i % colors.length]);
+      s.style.setProperty('--d', `${3.6 + Math.random() * 3.4}s`);
+      s.style.setProperty('--delay', `${Math.random() * 3}s`);
+      s.style.setProperty('--sway', `${Math.round(Math.random() * 140 - 70)}px`);
+      if (i % 4 === 0) s.textContent = '✦';
+      box.appendChild(s);
+    }
   }
   function spawnTapSpark(x, y) {
     const s = document.createElement('span');
@@ -2200,7 +2303,8 @@
       candlesBlown = false;
       wishBurstOpen = false;
       if (cakeSvg) cakeSvg.classList.remove('blown');
-      if (cakeScene) cakeScene.classList.remove('bursting');
+      if (cakeScene) cakeScene.classList.remove('bursting', 'wished');
+      resetWishGlow();
       if (wishPrompt) wishPrompt.style.opacity = '';
       if (wishBurst) wishBurst.classList.remove('show');
     } else if (next === 1) {
