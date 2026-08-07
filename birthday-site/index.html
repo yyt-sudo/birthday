@@ -1336,7 +1336,7 @@
     </div>
   </div>
   <audio id="bgm" src="Celebrate-Red%20Velvet.mp3" loop preload="metadata"></audio>
-  <audio id="voiceMsg" src="录音机-20260806-1534..m4a" preload="none"></audio>
+  <audio id="voiceMsg" src="voice-message.mp3" preload="none"></audio>
   <div class="stage scene-greeting" id="stage">
     <button class="music-btn" id="musicBtn" type="button" title="播放音乐" aria-label="播放音乐">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
@@ -1734,6 +1734,10 @@
   const bgm = document.getElementById('bgm');
   const musicBtn = document.getElementById('musicBtn');
   let musicStarted = false;
+  bgm.addEventListener('error', () => {
+    musicStarted = false;
+    musicBtn.classList.remove('playing');
+  });
   function startMusic() {
     if (musicStarted || !bgm) return;
     musicStarted = true;
@@ -1863,13 +1867,15 @@
   const thumb = (n) => `thumbs/${n}.jpg`;
   const full = (n) => `view/${n}.jpg`;
   const lightboxSrc = (n) => (window.matchMedia('(max-width: 760px)').matches ? `mobile/${n}.jpg` : full(n));
-  let thumbPreloads = [];
-  function preloadThumbs() {
-    if (thumbPreloads.length) return;
-    thumbPreloads = PHOTOS.map((n) => {
+  let thumbPreloads = [[], []];
+  function preloadThumbs(page = 0) {
+    const list = PHOTOS.slice(page * 8, page * 8 + 8);
+    const cache = thumbPreloads[page];
+    list.forEach((n, idx) => {
+      if (cache[idx]) return;
       const img = new Image();
       img.src = thumb(n);
-      return img;
+      cache[idx] = img;
     });
   }
   function preloadLightbox(i) {
@@ -2270,7 +2276,18 @@
   renderPhotos(photoPage1, PHOTOS.slice(0, 8), 0);
   renderPhotos(photoPage2, PHOTOS.slice(8), 8);
 
-  function showPhotoPage(next) {
+  function ensurePhotosLoaded(container) {
+    const imgs = [...container.querySelectorAll('img')];
+    imgs.forEach((img) => { img.loading = 'eager'; });
+    return Promise.all(imgs.map((img) => {
+      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      return new Promise((resolve) => {
+        img.addEventListener('load', resolve, { once: true });
+        img.addEventListener('error', resolve, { once: true });
+      });
+    }));
+  }
+  function applyPhotoPage(next) {
     photoPage = next;
     photoPage1.classList.toggle('hidden', next !== 0);
     photoPage2.classList.toggle('hidden', next !== 1);
@@ -2280,6 +2297,14 @@
     pageDots.innerHTML = PHOTOS.slice(0, 2).map((_, i) =>
       `<button class="page-dot${i === next ? ' active' : ''}" data-page="${i}" type="button" aria-label="第 ${i + 1} 页"></button>`
     ).join('');
+  }
+  function showPhotoPage(next) {
+    if (next === 1) {
+      preloadThumbs(1);
+      ensurePhotosLoaded(photoPage2).then(() => applyPhotoPage(1)).catch(() => applyPhotoPage(1));
+    } else {
+      applyPhotoPage(next);
+    }
   }
   showPhotoPage(0);
 
@@ -2308,7 +2333,7 @@
     }
     if (scene === 2) startLetterTyping();
     if (scene === 3) {
-      preloadThumbs();
+      preloadThumbs(0);
       showPhotoPage(0);
     }
     if (next === 4) fadeBgm(0.12);
@@ -2407,13 +2432,19 @@
   voiceBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     if (voiceMsg.paused) {
-      duckBgm();
-      voiceMsg.play().catch(() => {});
-      voiceLabel.textContent = '暂停留言';
+      voiceMsg.play().then(() => {
+        voiceLabel.textContent = '暂停留言';
+      }).catch(() => {
+        voiceLabel.textContent = '播放我的留言';
+      });
     } else {
       voiceMsg.pause();
       voiceLabel.textContent = '播放我的留言';
     }
+  });
+  voiceMsg.addEventListener('error', () => {
+    voiceLabel.textContent = '播放我的留言';
+    resumeBgmIfNeeded();
   });
   voiceMsg.addEventListener('play', duckBgm);
   voiceMsg.addEventListener('pause', () => {
