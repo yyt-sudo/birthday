@@ -1916,6 +1916,10 @@
       gateOpenedAt = performance.now();
       entryGate.classList.add('hide');
       startMusic();
+      preloadThumbs(0);
+      preloadThumbs(1);
+      const voice = document.getElementById('voiceMsg');
+      if (voice) voice.load();
     } else {
       gateError.classList.add('show');
       gateCodes.forEach((i) => { i.value = ''; });
@@ -2337,7 +2341,11 @@
     } else {
       hintText.textContent = '轻触屏幕';
     }
-    if (scene === 2) startLetterTyping();
+    if (scene === 2) {
+      startLetterTyping();
+      preloadThumbs(1);
+      if (voiceMsg) voiceMsg.load();
+    }
     if (scene === 3) {
       preloadThumbs(0);
       preloadThumbs(1);
@@ -2436,16 +2444,34 @@
       bgm.play().catch(() => {});
     }
   }
+  let voiceRetryTimer = null;
+  function startVoicePlayback() {
+    if (voiceRetryTimer) {
+      clearTimeout(voiceRetryTimer);
+      voiceRetryTimer = null;
+    }
+    voiceMsg.volume = 1;
+    voiceMsg.muted = false;
+    voiceMsg.play().then(() => {
+      voiceLabel.textContent = '暂停留言';
+    }).catch(() => {
+      voiceLabel.textContent = '播放我的留言';
+    });
+  }
   voiceBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     if (voiceMsg.paused) {
-      voiceMsg.volume = 1;
-      voiceMsg.muted = false;
-      voiceMsg.play().then(() => {
-        voiceLabel.textContent = '暂停留言';
-      }).catch(() => {
-        voiceLabel.textContent = '播放我的留言';
-      });
+      if (voiceMsg.readyState >= 3) {
+        startVoicePlayback();
+      } else {
+        voiceLabel.textContent = '留言加载中';
+        voiceMsg.load();
+        voiceMsg.removeEventListener('canplaythrough', startVoicePlayback);
+        voiceMsg.addEventListener('canplaythrough', startVoicePlayback, { once: true });
+        voiceRetryTimer = setTimeout(() => {
+          voiceLabel.textContent = '播放我的留言';
+        }, 6000);
+      }
     } else {
       voiceMsg.pause();
       voiceLabel.textContent = '播放我的留言';
