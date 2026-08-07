@@ -1811,7 +1811,6 @@
     }
   }
   gateBtn.addEventListener('click', tryEnter);
-  gateBtn.addEventListener('touchstart', tryEnter, { passive: true });
   gateCodes.forEach((input, idx) => {
     input.addEventListener('input', () => {
       gateError.classList.remove('show');
