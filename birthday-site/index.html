@@ -507,6 +507,10 @@
     opacity: 0;
     animation: confetti-fall 3.8s linear var(--d) infinite;
   }
+  #cakeConfetti i {
+    animation: confetti-fall 3.8s linear var(--d) forwards;
+    will-change: transform, opacity;
+  }
 
   /* ---------- 照片墙 ---------- */
   .scene-photos {
@@ -1197,8 +1201,10 @@
     100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1); }
   }
   @keyframes confetti-fall {
-    0% { opacity: 1; transform: translateY(0) rotate(0deg); }
-    100% { opacity: .95; transform: translateY(116vh) rotate(740deg); }
+    0% { opacity: 0; transform: translateY(-10vh) rotate(0deg); }
+    8% { opacity: 1; }
+    84% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(116vh) rotate(740deg); }
   }
   @keyframes photo-in {
     from { opacity: 0; transform: rotate(35deg) translateY(0) scale(.08); filter: blur(8px); }
@@ -1230,6 +1236,10 @@
     .photo-wall::-webkit-scrollbar { display: none; }
     .photo {
       padding: 4px 4px 10px;
+    }
+    .stage.scene-photos .photo {
+      animation-duration: .7s;
+      animation-delay: calc(.1s + var(--i) * 45ms);
     }
     .replay { top: 12px; right: 12px; width: 42px; height: 42px; }
     .music-btn { top: 12px; left: 12px; width: 42px; height: 42px; }
@@ -1749,12 +1759,28 @@
       c.style.setProperty('--d', `${Math.random() * 2}s`);
       c.style.setProperty('--c', colors[i % colors.length]);
       box.appendChild(c);
-      window.setTimeout(() => c.remove(), 4200);
+      c.addEventListener('animationend', () => c.remove(), { once: true });
     }
   }
   const PHOTOS = Array.from({ length: 15 }, (_, i) => i + 1);
   const thumb = (n) => `thumbs/${n}.jpg`;
   const full = (n) => `view/${n}.jpg`;
+  const lightboxSrc = (n) => (window.matchMedia('(max-width: 760px)').matches ? `mobile/${n}.jpg` : full(n));
+  let thumbPreloads = [];
+  function preloadThumbs() {
+    if (thumbPreloads.length) return;
+    thumbPreloads = PHOTOS.map((n) => {
+      const img = new Image();
+      img.src = thumb(n);
+      return img;
+    });
+  }
+  function preloadLightbox(i) {
+    [i - 1, i, i + 1].forEach((idx) => {
+      const img = new Image();
+      img.src = lightboxSrc(PHOTOS[(idx + PHOTOS.length) % PHOTOS.length]);
+    });
+  }
 
   const cakeStage = document.getElementById('cakeStage');
   const cakeScene = document.getElementById('cakeScene');
@@ -1774,6 +1800,7 @@
     if (gateOpened) return;
     if (gateCodes.map((i) => i.value).join('') === '0705') {
       gateOpened = true;
+      preloadThumbs();
       entryGate.classList.add('hide');
       startMusic();
       musicBtn.classList.add('playing');
@@ -2206,7 +2233,8 @@
       lightboxImg.onload = () => lightbox.classList.remove('loading');
     };
     lightbox.classList.add('open', 'loading');
-    lightboxImg.src = full(PHOTOS[lightboxIndex]);
+    lightboxImg.src = lightboxSrc(PHOTOS[lightboxIndex]);
+    preloadLightbox(lightboxIndex);
   }
   function closeLightbox() {
     lightbox.classList.remove('open', 'loading');
