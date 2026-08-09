@@ -956,46 +956,61 @@
     position: absolute;
     inset: 0;
     display: none;
-    align-content: start;
+    align-items: center;
     justify-content: center;
-    grid-template-columns: repeat(5, 56px);
-    gap: 10px;
     padding: 64px 18px 92px;
-    overflow-y: auto;
-    scrollbar-width: none;
+    overflow: hidden;
     z-index: 5;
   }
   .reasons-grid.show {
-    display: grid;
+    display: flex;
   }
-  .reasons-grid::-webkit-scrollbar {
-    display: none;
-  }
-  @media (min-width: 761px) {
-    .reasons-grid {
-      grid-template-columns: repeat(11, 56px);
-    }
+  .reasons-shape {
+    position: relative;
+    width: min(94vw, 420px);
+    aspect-ratio: 1;
+    margin: auto;
   }
   .reason-chip {
-    position: relative;
-    width: 56px;
-    height: 56px;
+    position: absolute;
+    left: var(--hx);
+    top: var(--hy);
+    width: clamp(40px, 11vw, 54px);
+    height: clamp(40px, 11vw, 54px);
+    transform: translate(-50%, -50%);
     border: 0;
-    border-radius: 16px;
+    border-radius: 50%;
     background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
     color: #fff;
-    font-size: 20px;
+    font-size: clamp(15px, 4vw, 20px);
     font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 10px 22px rgba(0, 0, 0, .28);
-    transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .3);
+    transition: transform .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease;
   }
   .reason-chip:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 14px 28px rgba(0, 0, 0, .36);
+    transform: translate(-50%, -50%) scale(1.12);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, .4);
   }
   .reason-chip.viewed {
-    opacity: .72;
+    background: linear-gradient(160deg, #fff7ea, #ffe0e6);
+    color: #b85c76;
+    box-shadow: 0 8px 20px rgba(255, 190, 205, .35), 0 0 0 2px rgba(255, 215, 150, .55);
+  }
+  .reason-chip.viewed::after {
+    content: "✓";
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #e06488;
+    color: #fff;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, .25);
   }
   .reason-modal {
     position: absolute;
@@ -1142,16 +1157,18 @@
     left: 50%;
     top: 50%;
     z-index: 24;
-    padding: 18px 26px;
-    border: 1px solid rgba(255, 215, 150, .5);
-    border-radius: 16px;
-    background: rgba(20, 8, 14, .9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 28px 32px;
+    border: 1px solid rgba(255, 215, 150, .55);
+    border-radius: 20px;
+    background: rgba(24, 9, 16, .92);
     color: #ffe6a3;
-    font-size: clamp(16px, 4vw, 22px);
-    letter-spacing: .1em;
     opacity: 0;
     visibility: hidden;
-    transform: translate(-50%, -50%) scale(.9);
+    transform: translate(-50%, -50%) scale(.85);
     transition: opacity .5s ease, transform .5s ease, visibility .5s ease;
     pointer-events: none;
     text-align: center;
@@ -1160,6 +1177,37 @@
     opacity: 1;
     visibility: visible;
     transform: translate(-50%, -50%) scale(1);
+  }
+  .reasons-done-heart {
+    font-size: 44px;
+    line-height: 1;
+    color: #ff7c9c;
+    text-shadow: 0 0 30px rgba(255, 124, 156, .8);
+    animation: heart-beat 1.2s ease-in-out infinite;
+  }
+  .reasons-done .done-title {
+    margin: 0;
+    font-size: clamp(20px, 5vw, 28px);
+    font-weight: 800;
+    color: #ffd98a;
+  }
+  .reasons-done .done-line {
+    margin: 0;
+    font-size: clamp(15px, 3.6vw, 20px);
+    line-height: 1.7;
+    color: rgba(255, 230, 180, .95);
+  }
+  .reasons-done-float {
+    position: absolute;
+    font-size: 14px;
+    color: #ff9db4;
+    opacity: 0;
+    animation: done-float 2.6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes done-float {
+    0%, 100% { opacity: 0; transform: translateY(6px) scale(.7); }
+    50% { opacity: 1; transform: translateY(-14px) scale(1.1); }
   }
   .reasons-grid.celebrate .reason-chip {
     animation: chip-pop .55s ease;
@@ -2176,8 +2224,18 @@
         <span>轻触翻开</span>
       </div>
       <div class="reasons-progress" id="reasonsProgress">已翻开 0 / 22</div>
-      <div class="reasons-grid" id="reasonsGrid"></div>
-      <div class="reasons-done" id="reasonsDone">你把所有理由都找到了</div>
+      <div class="reasons-grid" id="reasonsGrid">
+        <div class="reasons-shape" id="reasonsShape"></div>
+      </div>
+      <div class="reasons-done" id="reasonsDone">
+        <span class="reasons-done-float" style="left:12%;top:18%;animation-delay:0s">♥</span>
+        <span class="reasons-done-float" style="left:78%;top:22%;animation-delay:.5s">✦</span>
+        <span class="reasons-done-float" style="left:20%;top:72%;animation-delay:1s">♥</span>
+        <span class="reasons-done-float" style="left:80%;top:70%;animation-delay:1.5s">✦</span>
+        <span class="reasons-done-heart">♥</span>
+        <p class="done-title">第 23 个理由</p>
+        <p class="done-line">没有理由，就是想一直喜欢你</p>
+      </div>
       <div class="reason-modal" id="reasonModal">
         <button class="reason-modal-close" id="reasonModalClose" type="button" aria-label="关闭">×</button>
         <button class="reason-modal-nav prev" id="reasonModalPrev" type="button" aria-label="上一条">‹</button>
@@ -2886,6 +2944,7 @@
   const reasonsScene = document.getElementById('reasonsScene');
   const reasonsCover = document.getElementById('reasonsCover');
   const reasonsGrid = document.getElementById('reasonsGrid');
+  const reasonsShape = document.getElementById('reasonsShape');
   const reasonsNextBtn = document.getElementById('reasonsNextBtn');
   const reasonsProgress = document.getElementById('reasonsProgress');
   const reasonsDone = document.getElementById('reasonsDone');
@@ -2979,9 +3038,14 @@
     if (reasonModal) reasonModal.classList.remove('show');
   }
   function renderReasons() {
-    if (!reasonsGrid) return;
-    reasonsGrid.innerHTML = REASONS.map((reason, i) => `
-      <button class="reason-chip" type="button" data-index="${i}" style="--fc:${reasonPalette[i % reasonPalette.length]}" aria-label="理由 ${i + 1}">${i + 1}</button>`).join('');
+    if (!reasonsShape) return;
+    const html = REASONS.map((reason, i) => {
+      const t = (i / REASONS.length) * Math.PI * 2;
+      const hx = 50 + 16 * Math.pow(Math.sin(t), 3) * 2.4;
+      const hy = 50 - (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * 2.4;
+      return `<button class="reason-chip" type="button" data-index="${i}" style="--fc:${reasonPalette[i % reasonPalette.length]};--hx:${hx.toFixed(1)}%;--hy:${hy.toFixed(1)}%" aria-label="理由 ${i + 1}">${i + 1}</button>`;
+    }).join('');
+    reasonsShape.innerHTML = html;
   }
   renderReasons();
   if (reasonsCover) {
