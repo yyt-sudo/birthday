@@ -1074,42 +1074,70 @@
     position: absolute;
     inset: 0;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    grid-template-rows: repeat(5, auto);
+    grid-template-columns: repeat(5, 54px);
+    grid-template-rows: repeat(5, 72px);
+    justify-content: center;
     align-content: start;
     gap: 8px;
     padding: 74px 18px 90px;
     z-index: 1;
-    overflow-y: auto;
-    scrollbar-width: none;
-  }
-  .reason-board::-webkit-scrollbar {
-    display: none;
+    overflow: hidden;
   }
   @media (min-width: 761px) {
     .reason-board {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      grid-template-rows: repeat(4, auto);
+      grid-template-columns: repeat(6, 62px);
+      grid-template-rows: repeat(4, 84px);
     }
   }
   .reason-back-card {
     position: relative;
     width: 100%;
-    aspect-ratio: 3 / 4;
-    border: 1px solid rgba(255, 255, 255, .5);
+    height: 100%;
+    border: 1px solid rgba(255, 255, 255, .55);
     border-radius: 10px;
     background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
     color: #fff;
-    font-size: clamp(13px, 3.4vw, 18px);
+    font-size: clamp(14px, 2.4vw, 18px);
     font-weight: 800;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: .72;
-    filter: saturate(.8) brightness(.96);
+    opacity: .82;
+    filter: saturate(.82) brightness(.98);
     cursor: pointer;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, .22);
+    box-shadow:
+      0 10px 20px rgba(0, 0, 0, .28),
+      inset 0 0 0 1px rgba(255, 255, 255, .25),
+      inset 0 -16px 26px rgba(0, 0, 0, .12);
+    transform: rotate(var(--rot, 0deg));
+    transition: transform .2s ease, box-shadow .2s ease;
     animation: back-card-in .45s ease;
+  }
+  .reason-back-card::before {
+    content: "";
+    position: absolute;
+    left: 8%;
+    top: 6%;
+    width: 84%;
+    height: 38%;
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0));
+    pointer-events: none;
+  }
+  .reason-back-card::after {
+    content: "♥";
+    position: absolute;
+    right: 5px;
+    bottom: 3px;
+    font-size: 9px;
+    color: rgba(255, 255, 255, .9);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+    pointer-events: none;
+  }
+  .reason-back-card:hover {
+    transform: rotate(var(--rot, 0deg)) scale(1.1);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, .36);
+    z-index: 3;
   }
   @keyframes deal-pop {
     0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); }
@@ -3189,6 +3217,7 @@
         card.type = 'button';
         card.dataset.index = String(i);
         card.style.setProperty('--fc', reasonPalette[i % reasonPalette.length]);
+        card.style.setProperty('--rot', `${(Math.random() * 4 - 2).toFixed(1)}deg`);
         card.textContent = i + 1;
         card.addEventListener('click', (e) => {
           e.stopPropagation();
