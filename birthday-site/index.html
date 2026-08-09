@@ -849,11 +849,16 @@
   }
   .letter-core {
     font-family: "KaiTi", "STKaiti", "楷体", "Microsoft YaHei", serif;
+    width: min(88vw, 680px);
+    max-height: 74vh;
+    overflow-y: auto;
+    padding: clamp(22px, 5vw, 44px);
     background:
-      repeating-linear-gradient(0deg, rgba(140, 90, 50, .05) 0 1px, transparent 1px 34px),
-      linear-gradient(180deg, rgba(255, 250, 245, .94), rgba(255, 226, 234, .86));
-    border: 1px solid rgba(255, 255, 255, .75);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, .4), 0 0 46px rgba(255, 195, 215, .32);
+      repeating-linear-gradient(0deg, rgba(150, 95, 60, .05) 0 1px, transparent 1px 34px),
+      linear-gradient(180deg, #fff7ea 0%, #f9e7dc 100%);
+    border: 1px solid rgba(255, 210, 150, .5);
+    border-radius: 14px;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 255, 255, .45) inset, 0 0 42px rgba(255, 185, 140, .18);
   }
   .letter-title {
     margin: 0 0 20px;
@@ -952,13 +957,16 @@
   .end-back:hover { background: rgba(255, 215, 150, .22); }
   .letter-core {
     font-family: "KaiTi", "STKaiti", "楷体", "Microsoft YaHei", serif;
+    width: min(88vw, 680px);
+    max-height: 74vh;
+    overflow-y: auto;
+    padding: clamp(22px, 5vw, 44px);
     background:
-      repeating-linear-gradient(0deg, rgba(140, 90, 50, .05) 0 1px, transparent 1px 34px),
-      linear-gradient(180deg, rgba(255, 247, 238, .82), rgba(246, 225, 232, .68));
-    border: 1px solid rgba(255, 255, 255, .5);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, .45), 0 0 42px rgba(255, 185, 205, .22);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
+      repeating-linear-gradient(0deg, rgba(150, 95, 60, .05) 0 1px, transparent 1px 34px),
+      linear-gradient(180deg, #fff7ea 0%, #f9e7dc 100%);
+    border: 1px solid rgba(255, 210, 150, .5);
+    border-radius: 14px;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 255, 255, .45) inset, 0 0 42px rgba(255, 185, 140, .18);
   }
   .letter-title {
     color: #8a4a25;
@@ -988,7 +996,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 22px;
+    padding: 18px;
     border: 0;
     background:
       radial-gradient(circle at 50% 38%, rgba(255, 165, 195, .30), transparent 48%),
@@ -1014,7 +1022,7 @@
   }
   .envelope-card {
     position: relative;
-    width: min(84vw, 480px);
+    width: min(100%, 480px);
     aspect-ratio: 5 / 3.45;
     background:
       radial-gradient(circle at 28% 18%, rgba(255, 255, 255, .95), transparent 46%),
