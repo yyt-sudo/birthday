@@ -967,11 +967,11 @@
   }
   .reasons-shape {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(7, 1fr);
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(6, 1fr);
     gap: 5px;
-    width: min(92vw, 360px);
-    aspect-ratio: 1;
+    width: min(94vw, 480px);
+    aspect-ratio: 9 / 6;
     margin: auto;
   }
   .reason-chip {
@@ -982,7 +982,7 @@
     border-radius: 50%;
     background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
     color: #fff;
-    font-size: clamp(14px, 3.6vw, 19px);
+    font-size: clamp(13px, 3.4vw, 18px);
     font-weight: 800;
     cursor: pointer;
     box-shadow: 0 10px 22px rgba(0, 0, 0, .3);
@@ -2233,7 +2233,7 @@
         <span class="reasons-done-float" style="left:20%;top:72%;animation-delay:1s">♥</span>
         <span class="reasons-done-float" style="left:80%;top:70%;animation-delay:1.5s">✦</span>
         <span class="reasons-done-heart">♥</span>
-        <p class="done-title">第 23 个理由</p>
+        <p class="done-title">彩蛋解锁</p>
         <p class="done-line">没有理由，就是想一直喜欢你</p>
       </div>
       <div class="reason-modal" id="reasonModal">
@@ -2918,28 +2918,28 @@
   showPhotoPage(0);
 
   const REASONS = [
-    '因为你的笑容，是我一天里最想看见的风景。',
-    '因为再平常的话，你也愿意认真听完。',
-    '因为看你认真吃饭的样子，人间忽然就值得了。',
-    '因为那些我没说出口的在意，你都悄悄记住了。',
-    '因为你连生气都像一场来得快去得快的雨。',
-    '因为你对小动物毫无抵抗力，眼里会发光。',
-    '因为你说“随便”的时候，心里其实早已有了答案。',
-    '因为我的随口一句玩笑，你都会放在心上认真回应。',
-    '因为和你在一起，连赖床的早晨都有了期待。',
-    '因为睡熟之后，你总会不自觉地靠向我。',
-    '因为你的笑点很低，但每一笑都是真的。',
-    '因为夜深了，你还会悄悄抢走半张被子。',
-    '因为一点点小事，就能让你开心很久很久。',
-    '因为你说“我爱你”的时候，眉眼都是弯的。',
-    '因为好吃的东西，你总舍不得一口气吃完。',
-    '因为就算迷路了，你也倔强地说“我知道怎么走”。',
-    '因为和你在一起，沉默也不会尴尬。',
-    '因为惊醒的深夜，你会迷迷糊糊地靠近我。',
-    '因为我不说话的时候，你也懂我在想什么。',
-    '因为想把所有好吃的第一口，都留给你。',
-    '因为再普通的日子，和你一起就变得有意思。',
-    '因为第 22 个理由，是“没有理由，就是想一直喜欢你”。'
+    '你的笑容，是我一天里最想看见的风景。',
+    '再平常的话，你也愿意认真听完。',
+    '看你认真吃饭的样子，人间忽然就值得了。',
+    '那些我没说出口的在意，你都悄悄记住了。',
+    '你连生气都像一场来得快去得快的雨。',
+    '你对小动物毫无抵抗力，眼里会发光。',
+    '你说“随便”的时候，心里其实早已有了答案。',
+    '我的随口一句玩笑，你都会放在心上认真回应。',
+    '和你在一起，连赖床的早晨都有了期待。',
+    '睡熟之后，你总会不自觉地靠向我。',
+    '你的笑点很低，但每一笑都是真的。',
+    '夜深了，你还会悄悄抢走半张被子。',
+    '一点点小事，就能让你开心很久很久。',
+    '你说“我爱你”的时候，眉眼都是弯的。',
+    '好吃的东西，你总舍不得一口气吃完。',
+    '就算迷路了，你也倔强地说“我知道怎么走”。',
+    '和你在一起，沉默也不会尴尬。',
+    '惊醒的深夜，你会迷迷糊糊地靠近我。',
+    '我不说话的时候，你也懂我在想什么。',
+    '想把所有好吃的第一口，都留给你。',
+    '再普通的日子，和你一起就变得有意思。',
+    '第 22 个理由，是“没有理由，就是想一直喜欢你”。'
   ];
   const reasonsScene = document.getElementById('reasonsScene');
   const reasonsCover = document.getElementById('reasonsCover');
@@ -2966,6 +2966,7 @@
   let reasonsCoverOpen = true;
   let viewedCount = 0;
   let currentReason = 0;
+  let pendingCelebration = false;
   const viewedSet = new Set();
   function updateReasonProgress() {
     if (reasonsProgress) reasonsProgress.textContent = `已翻开 ${viewedCount} / ${REASONS.length}`;
@@ -2987,6 +2988,7 @@
     viewedCount = 0;
     currentReason = 0;
     viewedSet.clear();
+    pendingCelebration = false;
     if (reasonsScene) reasonsScene.classList.remove('active');
     if (reasonsCover) reasonsCover.classList.remove('hide');
     if (reasonsGrid) {
@@ -3021,12 +3023,8 @@
       const chip = reasonsGrid ? reasonsGrid.querySelector(`.reason-chip[data-index="${currentReason}"]`) : null;
       if (chip) chip.classList.add('viewed');
       if (viewedCount === REASONS.length) {
-        if (reasonsDone) reasonsDone.classList.add('show');
+        pendingCelebration = true;
         if (reasonsGrid) reasonsGrid.classList.add('celebrate');
-        window.setTimeout(() => {
-          if (reasonsDone) reasonsDone.classList.remove('show');
-          if (reasonsGrid) reasonsGrid.classList.remove('celebrate');
-        }, 2600);
       }
     }
   }
@@ -3036,15 +3034,22 @@
   }
   function closeReasonModal() {
     if (reasonModal) reasonModal.classList.remove('show');
+    if (pendingCelebration) {
+      pendingCelebration = false;
+      if (reasonsDone) reasonsDone.classList.add('show');
+      window.setTimeout(() => {
+        if (reasonsDone) reasonsDone.classList.remove('show');
+        if (reasonsGrid) reasonsGrid.classList.remove('celebrate');
+      }, 3200);
+    }
   }
   const HEART_CELLS = [
-    [3, 1], [4, 1], [5, 1],
-    [2, 2], [3, 2], [4, 2], [5, 2], [6, 2],
-    [1, 3], [2, 3], [4, 3], [6, 3], [7, 3],
-    [1, 4], [3, 4], [5, 4],
-    [2, 5], [4, 5], [6, 5],
-    [3, 6], [5, 6],
-    [4, 7]
+    [1, 4], [1, 6],
+    [2, 3], [2, 5], [2, 7],
+    [3, 2], [3, 4], [3, 6], [3, 8],
+    [4, 2], [4, 3], [4, 4], [4, 5], [4, 6], [4, 7], [4, 8],
+    [5, 3], [5, 4], [5, 5], [5, 6], [5, 7],
+    [6, 5]
   ];
   function renderReasons() {
     if (!reasonsShape) return;
