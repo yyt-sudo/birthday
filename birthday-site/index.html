@@ -3089,14 +3089,14 @@
       container.appendChild(h);
     }
   }
-  createFloatingHearts(document.getElementById('floatingHearts'), 12);
-  createFloatingHearts(document.getElementById('letterHearts'), 12);
+  createFloatingHearts(document.getElementById('floatingHearts'), 10);
+  createFloatingHearts(document.getElementById('letterHearts'), 10);
 
   function createAmbientParticles() {
     const box = document.getElementById('ambientParticles');
     if (!box) return;
     const colors = ['#ffe6a3', '#ffc3cf', '#ffd98a', '#fff0d0', '#8fd3c7'];
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < 8; i++) {
       const p = document.createElement('span');
       p.className = 'ambient-particle';
       p.style.setProperty('--x', `${Math.random() * 100}%`);
@@ -3230,7 +3230,7 @@
       <button class="photo" type="button" data-index="${baseIndex + i}" data-full="${full(n)}"
         style="--i:${i};--r:${rotations[i]}deg;--t:${shifts[i]}px"
         aria-label="照片 ${n}">
-        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="lazy"></span>
+        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="${baseIndex >= 8 ? 'eager' : 'lazy'}"></span>
       </button>`).join('');
     container.querySelectorAll('img').forEach((img) => {
       const mark = () => img.classList.add('loaded');
@@ -3323,11 +3323,12 @@
   let deckIndex = 0;
   let currentCleanupTimer = null;
   function shuffleDeck() {
-    deckOrder = REASONS.map((_, i) => i);
+    deckOrder = REASONS.map((_, i) => i).slice(0, REASONS.length - 1);
     for (let i = deckOrder.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [deckOrder[i], deckOrder[j]] = [deckOrder[j], deckOrder[i]];
     }
+    deckOrder.push(REASONS.length - 1);
     deckIndex = 0;
   }
   function updateReasonProgress() {
