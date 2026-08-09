@@ -952,76 +952,163 @@
     letter-spacing: .18em;
     background: rgba(255, 215, 150, .12);
   }
-  .reasons-grid {
+  .reasons-table {
     position: absolute;
     inset: 0;
     display: none;
     align-items: center;
     justify-content: center;
-    padding: 64px 18px 92px;
-    overflow: hidden;
     z-index: 5;
+    perspective: 1200px;
   }
-  .reasons-grid.show {
+  .reasons-table.show {
     display: flex;
   }
-  .reasons-shape {
+  .reason-deck {
     position: relative;
-    width: min(94vw, 420px);
-    aspect-ratio: 1;
-    margin: auto;
+    width: min(46vw, 210px);
+    aspect-ratio: 3 / 4.2;
+    border: 2px solid rgba(255, 215, 150, .5);
+    border-radius: 18px;
+    background:
+      repeating-linear-gradient(45deg, rgba(255, 255, 255, .06) 0 8px, transparent 8px 16px),
+      linear-gradient(155deg, #64233c, #2b1220);
+    color: #ffe6a3;
+    cursor: pointer;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .reasons-center {
+  .reason-deck-back {
+    font-size: clamp(30px, 9vw, 50px);
+    text-align: center;
+    text-shadow: 0 0 22px rgba(255, 190, 120, .55);
+  }
+  .reason-deck-back small {
+    display: block;
+    font-size: clamp(14px, 4vw, 22px);
+    margin-top: 6px;
+    letter-spacing: .1em;
+  }
+  .reason-deck.disabled {
+    opacity: .65;
+    pointer-events: none;
+  }
+  .reason-current {
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
-    color: #ff7c9c;
-    font-size: clamp(24px, 7vw, 38px);
-    text-shadow: 0 0 26px rgba(255, 124, 156, .8);
-    pointer-events: none;
-    z-index: 2;
+    width: min(72vw, 360px);
+    aspect-ratio: 3 / 4;
+    transform: translate(-50%, -50%) scale(.3);
+    opacity: 0;
+    visibility: hidden;
+    z-index: 10;
+    perspective: 1200px;
   }
-  .reason-chip {
+  .reason-current.dealt {
+    opacity: 1;
+    visibility: visible;
+    animation: deal-pop .45s ease forwards;
+  }
+  .reason-current.collecting {
+    animation: collect-fly .45s ease forwards;
+  }
+  .reason-current-inner {
     position: absolute;
-    left: var(--hx);
-    top: var(--hy);
-    width: clamp(38px, 10vw, 50px);
-    height: clamp(38px, 10vw, 50px);
-    transform: translate(-50%, -50%);
-    border: 0;
-    border-radius: 50%;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform .55s ease;
+  }
+  .reason-current.flipped .reason-current-inner {
+    transform: rotateY(180deg);
+  }
+  .reason-current-front,
+  .reason-current-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 22px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .5);
+  }
+  .reason-current-front {
     background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
     color: #fff;
-    font-size: clamp(14px, 3.6vw, 19px);
+    font-size: clamp(56px, 16vw, 100px);
+    font-weight: 800;
+    text-shadow: 0 3px 14px rgba(0, 0, 0, .25);
+  }
+  .reason-current-front::after {
+    content: "♥";
+    font-size: 16px;
+    opacity: .8;
+  }
+  .reason-current-back {
+    transform: rotateY(180deg);
+    background:
+      radial-gradient(circle at 28% 18%, rgba(255, 255, 255, .85), transparent 46%),
+      linear-gradient(160deg, #fffaf4, #ffe9ef 60%, #ffdbe2);
+    color: #8a3f58;
+    font-size: clamp(17px, 4.4vw, 24px);
+    font-weight: 600;
+    line-height: 1.8;
+  }
+  .reason-current-back::before {
+    content: "“";
+    display: block;
+    margin-bottom: 6px;
+    color: #e58aa4;
+    font-size: 32px;
+    line-height: 1;
+  }
+  .reason-hand {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 76px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 12px;
+    max-height: 26vh;
+    overflow-y: auto;
+    z-index: 8;
+  }
+  .reason-hand-card {
+    position: relative;
+    width: clamp(44px, 11vw, 58px);
+    aspect-ratio: 3 / 4;
+    border: 0;
+    border-radius: 10px;
+    background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
+    color: #fff;
+    font-size: clamp(14px, 3.6vw, 18px);
     font-weight: 800;
     cursor: pointer;
     box-shadow: 0 10px 22px rgba(0, 0, 0, .3);
-    transition: transform .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease;
+    animation: card-into-hand .4s ease;
   }
-  .reason-chip:hover {
-    transform: translate(-50%, -50%) scale(1.1);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, .4);
+  @keyframes deal-pop {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); }
+    60% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   }
-  .reason-chip.viewed {
-    background: linear-gradient(160deg, #fff7ea, #ffe0e6);
-    color: #b85c76;
-    box-shadow: 0 8px 20px rgba(255, 190, 205, .35), 0 0 0 2px rgba(255, 215, 150, .55);
+  @keyframes collect-fly {
+    to { opacity: 0; transform: translate(-50%, 24vh) scale(.4); }
   }
-  .reason-chip.viewed::after {
-    content: "✓";
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #e06488;
-    color: #fff;
-    font-size: 12px;
-    line-height: 20px;
-    text-align: center;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, .25);
+  @keyframes card-into-hand {
+    from { opacity: 0; transform: scale(.4) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
   }
   .reason-modal {
     position: absolute;
@@ -2235,9 +2322,18 @@
         <span>轻触翻开</span>
       </div>
       <div class="reasons-progress" id="reasonsProgress">已翻开 0 / 22</div>
-      <div class="reasons-grid" id="reasonsGrid">
-        <div class="reasons-shape" id="reasonsShape"><span class="reasons-center">♥</span></div>
+      <div class="reasons-table" id="reasonsTable">
+        <button class="reason-deck" id="reasonDeck" type="button">
+          <span class="reason-deck-back">♥<small>发一张</small></span>
+        </button>
+        <div class="reason-current" id="reasonCurrent">
+          <span class="reason-current-inner">
+            <span class="reason-current-front" id="reasonCurrentFront"></span>
+            <span class="reason-current-back" id="reasonCurrentBack"></span>
+          </span>
+        </div>
       </div>
+      <div class="reason-hand" id="reasonHand"></div>
       <div class="reasons-done" id="reasonsDone">
         <span class="reasons-done-float" style="left:12%;top:18%;animation-delay:0s">♥</span>
         <span class="reasons-done-float" style="left:78%;top:22%;animation-delay:.5s">✦</span>
@@ -2954,11 +3050,14 @@
   ];
   const reasonsScene = document.getElementById('reasonsScene');
   const reasonsCover = document.getElementById('reasonsCover');
-  const reasonsGrid = document.getElementById('reasonsGrid');
-  const reasonsShape = document.getElementById('reasonsShape');
-  const reasonsNextBtn = document.getElementById('reasonsNextBtn');
   const reasonsProgress = document.getElementById('reasonsProgress');
   const reasonsDone = document.getElementById('reasonsDone');
+  const reasonsTable = document.getElementById('reasonsTable');
+  const reasonDeck = document.getElementById('reasonDeck');
+  const reasonCurrent = document.getElementById('reasonCurrent');
+  const reasonCurrentFront = document.getElementById('reasonCurrentFront');
+  const reasonCurrentBack = document.getElementById('reasonCurrentBack');
+  const reasonHand = document.getElementById('reasonHand');
   const reasonModal = document.getElementById('reasonModal');
   const reasonModalCard = document.getElementById('reasonModalCard');
   const reasonModalFront = document.getElementById('reasonModalFront');
@@ -2966,6 +3065,7 @@
   const reasonModalPrev = document.getElementById('reasonModalPrev');
   const reasonModalNext = document.getElementById('reasonModalNext');
   const reasonModalClose = document.getElementById('reasonModalClose');
+  const reasonsNextBtn = document.getElementById('reasonsNextBtn');
   const reasonPalette = [
     'linear-gradient(155deg, #ff9db4, #d94f72)',
     'linear-gradient(155deg, #ffd98a, #e6a33f)',
@@ -2975,12 +3075,24 @@
   ];
   const burstColors = ['#ffd98a', '#ff8fa3', '#8fd3c7', '#fff0d0', '#b8a7e8'];
   let reasonsCoverOpen = true;
-  let viewedCount = 0;
+  let collectedCount = 0;
+  let currentDealt = null;
   let currentReason = 0;
   let pendingCelebration = false;
-  const viewedSet = new Set();
+  const collectedSet = new Set();
+  let deckOrder = [];
+  let deckIndex = 0;
+  let currentCleanupTimer = null;
+  function shuffleDeck() {
+    deckOrder = REASONS.map((_, i) => i);
+    for (let i = deckOrder.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deckOrder[i], deckOrder[j]] = [deckOrder[j], deckOrder[i]];
+    }
+    deckIndex = 0;
+  }
   function updateReasonProgress() {
-    if (reasonsProgress) reasonsProgress.textContent = `已翻开 ${viewedCount} / ${REASONS.length}`;
+    if (reasonsProgress) reasonsProgress.textContent = `已收集 ${collectedCount} / ${REASONS.length}`;
   }
   function spawnReasonBurst(container) {
     if (!container) return;
@@ -2996,16 +3108,21 @@
   }
   function resetReasons() {
     reasonsCoverOpen = true;
-    viewedCount = 0;
+    collectedCount = 0;
+    currentDealt = null;
     currentReason = 0;
-    viewedSet.clear();
     pendingCelebration = false;
+    collectedSet.clear();
+    deckIndex = 0;
+    deckOrder = [];
+    if (currentCleanupTimer) clearTimeout(currentCleanupTimer);
+    currentCleanupTimer = null;
     if (reasonsScene) reasonsScene.classList.remove('active');
     if (reasonsCover) reasonsCover.classList.remove('hide');
-    if (reasonsGrid) {
-      reasonsGrid.classList.remove('show', 'celebrate');
-      reasonsGrid.querySelectorAll('.reason-chip.viewed').forEach((chip) => chip.classList.remove('viewed'));
-    }
+    if (reasonsTable) reasonsTable.classList.remove('show');
+    if (reasonCurrent) reasonCurrent.classList.remove('dealt', 'flipped', 'collecting');
+    if (reasonDeck) reasonDeck.classList.remove('disabled');
+    if (reasonHand) reasonHand.innerHTML = '';
     if (reasonModal) reasonModal.classList.remove('show');
     if (reasonsDone) reasonsDone.classList.remove('show');
     updateReasonProgress();
@@ -3015,7 +3132,70 @@
     reasonsCoverOpen = false;
     if (reasonsCover) reasonsCover.classList.add('hide');
     if (reasonsScene) reasonsScene.classList.add('active');
-    if (reasonsGrid) reasonsGrid.classList.add('show');
+    if (reasonsTable) reasonsTable.classList.add('show');
+    if (deckOrder.length === 0) shuffleDeck();
+    updateReasonProgress();
+  }
+  function dealCard() {
+    if (currentDealt !== null || deckIndex >= REASONS.length) return;
+    const i = deckOrder[deckIndex++];
+    currentDealt = i;
+    if (currentCleanupTimer) {
+      clearTimeout(currentCleanupTimer);
+      currentCleanupTimer = null;
+    }
+    if (reasonCurrentFront) reasonCurrentFront.textContent = i + 1;
+    if (reasonCurrentBack) reasonCurrentBack.textContent = REASONS[i];
+    if (reasonCurrent) {
+      reasonCurrent.style.setProperty('--fc', reasonPalette[i % reasonPalette.length]);
+      reasonCurrent.classList.remove('flipped', 'collecting');
+      void reasonCurrent.offsetWidth;
+      reasonCurrent.classList.add('dealt');
+      window.setTimeout(() => reasonCurrent.classList.add('flipped'), 300);
+    }
+    if (reasonDeck) reasonDeck.classList.add('disabled');
+  }
+  function collectCurrent() {
+    if (currentDealt === null) return;
+    const i = currentDealt;
+    currentDealt = null;
+    if (reasonCurrent) reasonCurrent.classList.add('collecting');
+    if (reasonDeck) reasonDeck.classList.remove('disabled');
+    if (currentCleanupTimer) clearTimeout(currentCleanupTimer);
+    currentCleanupTimer = window.setTimeout(() => {
+      if (reasonCurrent) reasonCurrent.classList.remove('dealt', 'flipped', 'collecting');
+    }, 500);
+    if (!collectedSet.has(i)) {
+      collectedSet.add(i);
+      collectedCount += 1;
+      updateReasonProgress();
+      if (reasonHand) {
+        const card = document.createElement('button');
+        card.className = 'reason-hand-card';
+        card.type = 'button';
+        card.dataset.index = String(i);
+        card.style.setProperty('--fc', reasonPalette[i % reasonPalette.length]);
+        card.textContent = i + 1;
+        card.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openReasonModal(Number(card.dataset.index));
+        });
+        reasonHand.appendChild(card);
+        spawnReasonBurst(card);
+      }
+      if (collectedCount === REASONS.length) {
+        pendingCelebration = true;
+        window.setTimeout(() => {
+          if (pendingCelebration) {
+            pendingCelebration = false;
+            if (reasonsDone) reasonsDone.classList.add('show');
+            window.setTimeout(() => {
+              if (reasonsDone) reasonsDone.classList.remove('show');
+            }, 3200);
+          }
+        }, 600);
+      }
+    }
   }
   function showReason(i) {
     currentReason = (i + REASONS.length) % REASONS.length;
@@ -3027,17 +3207,6 @@
       reasonModalCard.classList.add('flipped');
     }
     spawnReasonBurst(reasonModalCard);
-    if (!viewedSet.has(currentReason)) {
-      viewedSet.add(currentReason);
-      viewedCount += 1;
-      updateReasonProgress();
-      const chip = reasonsGrid ? reasonsGrid.querySelector(`.reason-chip[data-index="${currentReason}"]`) : null;
-      if (chip) chip.classList.add('viewed');
-      if (viewedCount === REASONS.length) {
-        pendingCelebration = true;
-        if (reasonsGrid) reasonsGrid.classList.add('celebrate');
-      }
-    }
   }
   function openReasonModal(i) {
     if (reasonModal) reasonModal.classList.add('show');
@@ -3045,51 +3214,23 @@
   }
   function closeReasonModal() {
     if (reasonModal) reasonModal.classList.remove('show');
-    if (pendingCelebration) {
-      pendingCelebration = false;
-      if (reasonsDone) reasonsDone.classList.add('show');
-      window.setTimeout(() => {
-        if (reasonsDone) reasonsDone.classList.remove('show');
-        if (reasonsGrid) reasonsGrid.classList.remove('celebrate');
-      }, 3200);
-    }
   }
-  // 22 个数字按圆形排列
-  function renderReasons() {
-    if (!reasonsShape) return;
-    reasonsShape.innerHTML = '';
-    const center = document.createElement('span');
-    center.className = 'reasons-center';
-    center.textContent = '♥';
-    reasonsShape.appendChild(center);
-    REASONS.forEach((reason, i) => {
-      const angle = (i / REASONS.length) * Math.PI * 2 - Math.PI / 2;
-      const hx = 50 + 44 * Math.cos(angle);
-      const hy = 50 + 44 * Math.sin(angle);
-      const chip = document.createElement('button');
-      chip.className = 'reason-chip';
-      chip.type = 'button';
-      chip.dataset.index = String(i);
-      chip.setAttribute('aria-label', `理由 ${i + 1}`);
-      chip.style.setProperty('--fc', reasonPalette[i % reasonPalette.length]);
-      chip.style.setProperty('--hx', `${hx.toFixed(2)}%`);
-      chip.style.setProperty('--hy', `${hy.toFixed(2)}%`);
-      chip.textContent = i + 1;
-      reasonsShape.appendChild(chip);
-    });
-  }
-  renderReasons();
   if (reasonsCover) {
     reasonsCover.addEventListener('click', (e) => {
       e.stopPropagation();
       openReasons();
     });
   }
-  if (reasonsGrid) {
-    reasonsGrid.addEventListener('click', (e) => {
+  if (reasonDeck) {
+    reasonDeck.addEventListener('click', (e) => {
       e.stopPropagation();
-      const chip = e.target.closest('.reason-chip');
-      if (chip) openReasonModal(Number(chip.dataset.index));
+      dealCard();
+    });
+  }
+  if (reasonCurrent) {
+    reasonCurrent.addEventListener('click', (e) => {
+      e.stopPropagation();
+      collectCurrent();
     });
   }
   if (reasonModalCard) {
