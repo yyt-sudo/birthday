@@ -1038,8 +1038,6 @@
     border-radius: 18px;
     text-align: center;
     box-shadow: 0 30px 70px rgba(0, 0, 0, .5);
-    transition: opacity .7s ease-in-out;
-    will-change: opacity;
   }
   .reason-current-front {
     background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
@@ -1071,10 +1069,14 @@
     line-height: 1;
   }
   .reason-current.show-reason .reason-current-front {
-    opacity: 0;
+    display: none;
   }
   .reason-current.show-reason .reason-current-back {
-    opacity: 1;
+    animation: reason-text-in .55s ease both;
+  }
+  @keyframes reason-text-in {
+    from { opacity: 0; transform: translateY(12px) scale(.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
   .reason-board {
     position: absolute;
@@ -3407,7 +3409,7 @@
             if (reasonsNextBtn) reasonsNextBtn.classList.add('show');
             window.setTimeout(() => {
               if (reasonsDone) reasonsDone.classList.remove('show');
-            }, 3200);
+            }, 6000);
           }
         }, 600);
       }
