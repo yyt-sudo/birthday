@@ -958,7 +958,7 @@
     display: none;
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
-    padding: 22px 20px 84px;
+    padding: 64px 20px 92px;
     overflow-y: auto;
     scrollbar-width: none;
     z-index: 5;
@@ -1001,26 +1001,138 @@
     text-align: center;
   }
   .reason-front {
-    background:
-      radial-gradient(circle at 32% 24%, rgba(255, 180, 200, .25), transparent 45%),
-      linear-gradient(155deg, #552036, #351524);
-    border: 1px solid rgba(255, 215, 150, .35);
-    color: #ffd98a;
-    font-size: clamp(22px, 6vw, 34px);
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px;
+    border-radius: 14px;
+    text-align: center;
+    background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
+    border: 1px solid rgba(255, 255, 255, .45);
+    color: #fff;
+    font-size: clamp(28px, 8vw, 46px);
     font-weight: 800;
-    text-shadow: 0 0 16px rgba(255, 214, 130, .5);
-    box-shadow: 0 12px 26px rgba(0, 0, 0, .3);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, .25);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, .32);
+  }
+  .reason-front::after {
+    content: "♥";
+    font-size: 12px;
+    opacity: .75;
+    text-shadow: none;
   }
   .reason-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
     transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 10px;
+    border-radius: 14px;
+    text-align: center;
     background:
-      linear-gradient(160deg, #fffaf4, #ffe5eb 60%, #ffd7de);
-    border: 1px solid rgba(255, 255, 255, .8);
+      radial-gradient(circle at 28% 18%, rgba(255, 255, 255, .8), transparent 46%),
+      linear-gradient(160deg, #fffaf4, #ffe9ef 60%, #ffdbe2);
+    border: 1px solid rgba(255, 255, 255, .9);
     color: #8a3f58;
-    font-size: clamp(12px, 2.6vw, 15px);
+    font-size: clamp(14px, 3.6vw, 18px);
     font-weight: 600;
-    line-height: 1.5;
-    box-shadow: 0 12px 26px rgba(0, 0, 0, .3);
+    line-height: 1.55;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, .32);
+  }
+  .reason-back::before {
+    content: "“";
+    display: block;
+    margin-bottom: 4px;
+    color: #e58aa4;
+    font-size: 22px;
+    line-height: 1;
+  }
+  .reason-card:hover .reason-card-inner {
+    transform: translateY(-3px);
+  }
+  .reason-card.flipped:hover .reason-card-inner {
+    transform: rotateY(180deg) translateY(-3px);
+  }
+  .reason-burst {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: 0 0 8px var(--c);
+    pointer-events: none;
+    animation: reason-burst .7s ease-out forwards;
+  }
+  .reasons-progress {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9;
+    padding: 8px 18px;
+    border: 1px solid rgba(255, 215, 150, .45);
+    border-radius: 999px;
+    background: rgba(20, 8, 14, .72);
+    color: #ffe6a3;
+    font-size: 13px;
+    letter-spacing: .1em;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .4s ease, visibility .4s ease;
+    pointer-events: none;
+  }
+  .scene-reasons.active .reasons-progress {
+    opacity: 1;
+    visibility: visible;
+  }
+  .reasons-done {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 12;
+    padding: 18px 26px;
+    border: 1px solid rgba(255, 215, 150, .5);
+    border-radius: 16px;
+    background: rgba(20, 8, 14, .88);
+    color: #ffe6a3;
+    font-size: clamp(16px, 4vw, 22px);
+    letter-spacing: .1em;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -50%) scale(.9);
+    transition: opacity .5s ease, transform .5s ease, visibility .5s ease;
+    pointer-events: none;
+    text-align: center;
+  }
+  .reasons-done.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .reasons-grid.celebrate .reason-card {
+    animation: card-pop .55s ease;
+  }
+  @keyframes reason-burst {
+    from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    to { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(.2); }
+  }
+  @keyframes card-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
   }
   .reasons-next {
     position: absolute;
@@ -2029,6 +2141,8 @@
         <p>关于你，我有一万个理由，先写 22 个</p>
         <span>轻触翻开</span>
       </div>
+      <div class="reasons-progress" id="reasonsProgress">已翻开 0 / 22</div>
+      <div class="reasons-done" id="reasonsDone">你把所有理由都找到了</div>
       <div class="reasons-grid" id="reasonsGrid"></div>
       <button class="reasons-next" id="reasonsNextBtn" type="button">继续</button>
     </section>
@@ -2727,22 +2841,55 @@
   const reasonsCover = document.getElementById('reasonsCover');
   const reasonsGrid = document.getElementById('reasonsGrid');
   const reasonsNextBtn = document.getElementById('reasonsNextBtn');
+  const reasonsProgress = document.getElementById('reasonsProgress');
+  const reasonsDone = document.getElementById('reasonsDone');
+  const reasonPalette = [
+    'linear-gradient(155deg, #ff9db4, #d94f72)',
+    'linear-gradient(155deg, #ffd98a, #e6a33f)',
+    'linear-gradient(155deg, #8fd3c7, #4e9a8f)',
+    'linear-gradient(155deg, #b8a7e8, #7d6bc4)',
+    'linear-gradient(155deg, #ffb37d, #e0704a)'
+  ];
+  const burstColors = ['#ffd98a', '#ff8fa3', '#8fd3c7', '#fff0d0', '#b8a7e8'];
   let reasonsCoverOpen = true;
+  let flippedCount = 0;
+  function updateReasonProgress() {
+    if (reasonsProgress) reasonsProgress.textContent = `已翻开 ${flippedCount} / ${REASONS.length}`;
+  }
+  function spawnReasonBurst(card) {
+    for (let i = 0; i < 6; i++) {
+      const s = document.createElement('span');
+      s.className = 'reason-burst';
+      s.style.setProperty('--c', burstColors[i % burstColors.length]);
+      s.style.setProperty('--tx', `${(Math.random() * 56 - 28).toFixed(1)}px`);
+      s.style.setProperty('--ty', `${(Math.random() * 56 - 28).toFixed(1)}px`);
+      card.appendChild(s);
+      window.setTimeout(() => s.remove(), 750);
+    }
+  }
   function resetReasons() {
     reasonsCoverOpen = true;
+    flippedCount = 0;
+    if (reasonsScene) reasonsScene.classList.remove('active');
     if (reasonsCover) reasonsCover.classList.remove('hide');
-    if (reasonsGrid) reasonsGrid.classList.remove('show');
+    if (reasonsGrid) {
+      reasonsGrid.classList.remove('show', 'celebrate');
+      reasonsGrid.querySelectorAll('.reason-card.flipped').forEach((card) => card.classList.remove('flipped'));
+    }
+    if (reasonsDone) reasonsDone.classList.remove('show');
+    updateReasonProgress();
   }
   function openReasons() {
     if (!reasonsCoverOpen) return;
     reasonsCoverOpen = false;
     if (reasonsCover) reasonsCover.classList.add('hide');
+    if (reasonsScene) reasonsScene.classList.add('active');
     if (reasonsGrid) reasonsGrid.classList.add('show');
   }
   function renderReasons() {
     if (!reasonsGrid) return;
     reasonsGrid.innerHTML = REASONS.map((reason, i) => `
-      <button class="reason-card" type="button" aria-label="理由 ${i + 1}">
+      <button class="reason-card" type="button" style="--fc:${reasonPalette[i % reasonPalette.length]}" aria-label="理由 ${i + 1}">
         <span class="reason-card-inner">
           <span class="reason-front">${i + 1}</span>
           <span class="reason-back">${reason}</span>
@@ -2760,7 +2907,19 @@
     reasonsGrid.addEventListener('click', (e) => {
       e.stopPropagation();
       const card = e.target.closest('.reason-card');
-      if (card) card.classList.toggle('flipped');
+      if (!card || card.classList.contains('flipped')) return;
+      card.classList.add('flipped');
+      flippedCount += 1;
+      updateReasonProgress();
+      spawnReasonBurst(card);
+      if (flippedCount === REASONS.length) {
+        if (reasonsDone) reasonsDone.classList.add('show');
+        if (reasonsGrid) reasonsGrid.classList.add('celebrate');
+        window.setTimeout(() => {
+          if (reasonsDone) reasonsDone.classList.remove('show');
+          if (reasonsGrid) reasonsGrid.classList.remove('celebrate');
+        }, 2600);
+      }
     });
   }
   if (reasonsNextBtn) {
