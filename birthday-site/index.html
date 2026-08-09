@@ -1040,12 +1040,7 @@
     box-shadow: 0 30px 70px rgba(0, 0, 0, .5);
   }
   .reason-current-front {
-    background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
-    color: #fff;
-    font-size: clamp(56px, 16vw, 100px);
-    font-weight: 800;
-    text-shadow: 0 3px 14px rgba(0, 0, 0, .25);
-    opacity: 1;
+    display: none;
   }
   .reason-current-front::after {
     content: "♥";
@@ -1058,7 +1053,10 @@
     font-size: clamp(17px, 4.4vw, 24px);
     font-weight: 600;
     line-height: 1.8;
-    opacity: 0;
+    opacity: 1;
+  }
+  .reason-current-back.text-swap {
+    animation: reason-text-in .55s ease both;
   }
   .reason-current-back::before {
     content: "♥";
@@ -2063,6 +2061,10 @@
   }
 
   @media (max-width: 760px) {
+    .reason-done-heart {
+      font-size: clamp(56px, 18vw, 90px);
+    }
+  }
     .cake-stage { width: min(96vw, 480px); }
     .hint { bottom: 22px; font-size: 13px; letter-spacing: .16em; }
     .stage.scene-photos .hint { bottom: 68px; }
@@ -3357,14 +3359,20 @@
       clearTimeout(currentCleanupTimer);
       currentCleanupTimer = null;
     }
-    if (reasonCurrentFront) reasonCurrentFront.textContent = i + 1;
-    if (reasonCurrentBack) reasonCurrentBack.textContent = REASONS[i];
+    if (reasonCurrentBack) reasonCurrentBack.textContent = i + 1;
     if (reasonCurrent) {
       reasonCurrent.style.setProperty('--fc', reasonPalette[i % reasonPalette.length]);
-      reasonCurrent.classList.remove('show-reason', 'collecting');
+      reasonCurrent.classList.remove('collecting');
       void reasonCurrent.offsetWidth;
       reasonCurrent.classList.add('dealt');
-      window.setTimeout(() => reasonCurrent.classList.add('show-reason'), 650);
+      window.setTimeout(() => {
+        if (currentDealt === i && reasonCurrentBack) {
+          reasonCurrentBack.classList.remove('text-swap');
+          void reasonCurrentBack.offsetWidth;
+          reasonCurrentBack.textContent = REASONS[i];
+          reasonCurrentBack.classList.add('text-swap');
+        }
+      }, 650);
     }
     if (reasonDeck) reasonDeck.classList.add('disabled');
   }
@@ -3377,6 +3385,8 @@
     if (currentCleanupTimer) clearTimeout(currentCleanupTimer);
     currentCleanupTimer = window.setTimeout(() => {
       if (reasonCurrent) reasonCurrent.classList.remove('dealt', 'show-reason', 'collecting');
+      if (reasonCurrentBack) reasonCurrentBack.classList.remove('text-swap');
+    if (reasonCurrentBack) reasonCurrentBack.classList.remove('text-swap');
     }, 500);
     if (!collectedSet.has(i)) {
       collectedSet.add(i);
