@@ -1069,11 +1069,11 @@
     line-height: 1.8;
   }
   .reason-current-back::before {
-    content: "“";
+    content: "♥";
     display: block;
     margin-bottom: 6px;
     color: #e58aa4;
-    font-size: 32px;
+    font-size: 22px;
     line-height: 1;
   }
   .reason-board {
@@ -1120,6 +1120,9 @@
       inset 0 0 0 1px rgba(255, 255, 255, .3),
       inset 0 -18px 30px rgba(0, 0, 0, .14);
     text-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255, 255, 255, .08) 0 2px, transparent 2px 7px),
+      radial-gradient(circle at 25% 30%, rgba(255, 255, 255, .18), transparent 32%);
     transform: rotate(var(--rot, 0deg));
     transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
     animation: back-card-in .45s ease;
@@ -1234,11 +1237,11 @@
     box-shadow: 0 30px 70px rgba(0, 0, 0, .45);
   }
   .reason-modal-back::before {
-    content: "“";
+    content: "♥";
     display: block;
     margin-bottom: 6px;
     color: #e58aa4;
-    font-size: 34px;
+    font-size: 24px;
     line-height: 1;
   }
   .reason-modal-close,
@@ -1305,48 +1308,46 @@
   }
   .reasons-done {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    z-index: 24;
+    inset: 0;
+    z-index: 30;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    padding: 28px 32px;
-    border: 1px solid rgba(255, 215, 150, .55);
-    border-radius: 20px;
-    background: rgba(24, 9, 16, .92);
-    color: #ffe6a3;
+    justify-content: center;
+    gap: 14px;
+    background:
+      radial-gradient(circle at 50% 40%, rgba(255, 170, 195, .30), transparent 60%),
+      radial-gradient(circle at 20% 80%, rgba(255, 210, 150, .16), transparent 40%),
+      linear-gradient(155deg, #552036 0%, #351524 55%, #1d0d13 100%);
     opacity: 0;
     visibility: hidden;
-    transform: translate(-50%, -50%) scale(.85);
-    transition: opacity .5s ease, transform .5s ease, visibility .5s ease;
+    transition: opacity .5s ease, visibility .5s ease;
     pointer-events: none;
     text-align: center;
   }
   .reasons-done.show {
     opacity: 1;
     visibility: visible;
-    transform: translate(-50%, -50%) scale(1);
   }
   .reasons-done-heart {
-    font-size: 44px;
+    font-size: clamp(84px, 24vw, 160px);
     line-height: 1;
     color: #ff7c9c;
-    text-shadow: 0 0 30px rgba(255, 124, 156, .8);
+    text-shadow: 0 0 40px rgba(255, 124, 156, .9), 0 0 100px rgba(255, 160, 185, .5);
     animation: heart-beat 1.2s ease-in-out infinite;
   }
   .reasons-done .done-title {
     margin: 0;
-    font-size: clamp(20px, 5vw, 28px);
+    font-size: clamp(28px, 6vw, 44px);
     font-weight: 800;
     color: #ffd98a;
+    text-shadow: 0 0 24px rgba(255, 214, 130, .6);
   }
   .reasons-done .done-line {
     margin: 0;
-    font-size: clamp(15px, 3.6vw, 20px);
+    font-size: clamp(18px, 4.4vw, 28px);
     line-height: 1.7;
-    color: rgba(255, 230, 180, .95);
+    color: rgba(255, 230, 180, .96);
   }
   .reasons-done-float {
     position: absolute;
@@ -2371,13 +2372,13 @@
     <section class="scene scene-reasons" id="reasonsScene">
       <div class="reasons-cover" id="reasonsCover">
         <h2>22 个理由</h2>
-        <p>关于你，我有一万个理由，先写 22 个</p>
-        <span>轻触翻开</span>
+        <p>每一张，都是一句想对你说的话</p>
+        <span>轻点牌堆，开始发牌</span>
       </div>
       <div class="reasons-progress" id="reasonsProgress">已翻开 0 / 22</div>
       <div class="reasons-table" id="reasonsTable">
         <button class="reason-deck" id="reasonDeck" type="button">
-          <span class="reason-deck-back">♥<small>22</small></span>
+          <span class="reason-deck-back">♥</span>
         </button>
         <div class="reason-current" id="reasonCurrent">
           <span class="reason-current-inner">
@@ -2388,10 +2389,14 @@
       </div>
       <div class="reason-board" id="reasonBoard"></div>
       <div class="reasons-done" id="reasonsDone">
-        <span class="reasons-done-float" style="left:12%;top:18%;animation-delay:0s">♥</span>
-        <span class="reasons-done-float" style="left:78%;top:22%;animation-delay:.5s">✦</span>
-        <span class="reasons-done-float" style="left:20%;top:72%;animation-delay:1s">♥</span>
-        <span class="reasons-done-float" style="left:80%;top:70%;animation-delay:1.5s">✦</span>
+        <span class="reasons-done-float" style="left:8%;top:16%;animation-delay:0s">♥</span>
+        <span class="reasons-done-float" style="left:86%;top:20%;animation-delay:.4s">✦</span>
+        <span class="reasons-done-float" style="left:14%;top:70%;animation-delay:.8s">♥</span>
+        <span class="reasons-done-float" style="left:82%;top:74%;animation-delay:1.2s">✦</span>
+        <span class="reasons-done-float" style="left:30%;top:12%;animation-delay:1.6s">♥</span>
+        <span class="reasons-done-float" style="left:68%;top:14%;animation-delay:2s">✦</span>
+        <span class="reasons-done-float" style="left:24%;top:82%;animation-delay:2.4s">✦</span>
+        <span class="reasons-done-float" style="left:74%;top:84%;animation-delay:2.8s">♥</span>
         <span class="reasons-done-heart">♥</span>
         <p class="done-title">彩蛋</p>
         <p class="done-line">没有理由，就是想一直喜欢你</p>
@@ -2407,7 +2412,6 @@
         </div>
         <button class="reason-modal-nav next" id="reasonModalNext" type="button" aria-label="下一条">›</button>
       </div>
-      <button class="reasons-next" id="reasonsNextBtn" type="button">继续</button>
     </section>
 
     <section class="scene scene-ending" id="endingScene">
@@ -3118,7 +3122,6 @@
   const reasonModalPrev = document.getElementById('reasonModalPrev');
   const reasonModalNext = document.getElementById('reasonModalNext');
   const reasonModalClose = document.getElementById('reasonModalClose');
-  const reasonsNextBtn = document.getElementById('reasonsNextBtn');
   const reasonPalette = [
     'linear-gradient(155deg, #ff9db4, #d94f72)',
     'linear-gradient(155deg, #ffd98a, #e6a33f)',
@@ -3249,6 +3252,7 @@
             if (reasonsDone) reasonsDone.classList.add('show');
             window.setTimeout(() => {
               if (reasonsDone) reasonsDone.classList.remove('show');
+              setScene(5);
             }, 3200);
           }
         }, 600);
@@ -3321,12 +3325,6 @@
       if (e.target === reasonModal) closeReasonModal();
     });
   }
-  if (reasonsNextBtn) {
-    reasonsNextBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      setScene(5);
-    });
-  }
   const sceneNames = ['greeting', 'cake', 'letter', 'photos', 'reasons', 'ending'];
   let scene = 0;
   function setScene(next) {
@@ -3350,7 +3348,7 @@
     } else if (next === 2) {
       hintText.textContent = '轻触屏幕继续';
     } else if (next === 4) {
-      hintText.textContent = '轻触翻开 22 个理由';
+      hintText.textContent = '轻点牌堆，开始发牌';
     } else {
       hintText.textContent = '轻触屏幕';
     }
