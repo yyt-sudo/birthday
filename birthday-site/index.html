@@ -1070,33 +1070,42 @@
     font-size: 32px;
     line-height: 1;
   }
-  .reason-hand {
+  .reason-board {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 76px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
     gap: 8px;
-    padding: 0 12px;
-    max-height: 26vh;
-    overflow-y: auto;
-    z-index: 8;
+    padding: 74px 18px 90px;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
   }
-  .reason-hand-card {
+  @media (min-width: 761px) {
+    .reason-board {
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+    }
+  }
+  .reason-back-card {
     position: relative;
-    width: clamp(44px, 11vw, 58px);
+    width: 100%;
     aspect-ratio: 3 / 4;
-    border: 0;
-    border-radius: 10px;
-    background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
-    color: #fff;
-    font-size: clamp(14px, 3.6vw, 18px);
+    border: 1px solid rgba(255, 215, 150, .35);
+    border-radius: 12px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255, 255, 255, .5), transparent 45%),
+      linear-gradient(160deg, rgba(255, 248, 240, .28), rgba(255, 220, 230, .2));
+    color: rgba(255, 230, 180, .55);
+    font-size: clamp(13px, 3.4vw, 18px);
     font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 10px 22px rgba(0, 0, 0, .3);
-    animation: card-into-hand .4s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: .45;
+    filter: saturate(.5) brightness(1.1);
+    animation: back-card-in .45s ease;
   }
   @keyframes deal-pop {
     0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); }
@@ -1104,11 +1113,11 @@
     100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   }
   @keyframes collect-fly {
-    to { opacity: 0; transform: translate(-50%, 24vh) scale(.4); }
+    to { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
   }
-  @keyframes card-into-hand {
-    from { opacity: 0; transform: scale(.4) translateY(20px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+  @keyframes back-card-in {
+    from { opacity: 0; transform: scale(.5); }
+    to { opacity: .45; transform: scale(1); }
   }
   .reason-modal {
     position: absolute;
@@ -2324,7 +2333,7 @@
       <div class="reasons-progress" id="reasonsProgress">已翻开 0 / 22</div>
       <div class="reasons-table" id="reasonsTable">
         <button class="reason-deck" id="reasonDeck" type="button">
-          <span class="reason-deck-back">♥<small>发一张</small></span>
+          <span class="reason-deck-back">♥<small>22</small></span>
         </button>
         <div class="reason-current" id="reasonCurrent">
           <span class="reason-current-inner">
@@ -2333,7 +2342,7 @@
           </span>
         </div>
       </div>
-      <div class="reason-hand" id="reasonHand"></div>
+      <div class="reason-board" id="reasonBoard"></div>
       <div class="reasons-done" id="reasonsDone">
         <span class="reasons-done-float" style="left:12%;top:18%;animation-delay:0s">♥</span>
         <span class="reasons-done-float" style="left:78%;top:22%;animation-delay:.5s">✦</span>
@@ -3057,7 +3066,7 @@
   const reasonCurrent = document.getElementById('reasonCurrent');
   const reasonCurrentFront = document.getElementById('reasonCurrentFront');
   const reasonCurrentBack = document.getElementById('reasonCurrentBack');
-  const reasonHand = document.getElementById('reasonHand');
+  const reasonBoard = document.getElementById('reasonBoard');
   const reasonModal = document.getElementById('reasonModal');
   const reasonModalCard = document.getElementById('reasonModalCard');
   const reasonModalFront = document.getElementById('reasonModalFront');
@@ -3122,7 +3131,8 @@
     if (reasonsTable) reasonsTable.classList.remove('show');
     if (reasonCurrent) reasonCurrent.classList.remove('dealt', 'flipped', 'collecting');
     if (reasonDeck) reasonDeck.classList.remove('disabled');
-    if (reasonHand) reasonHand.innerHTML = '';
+    if (reasonBoard) reasonBoard.innerHTML = '';
+    if (reasonDeck) reasonDeck.style.display = '';
     if (reasonModal) reasonModal.classList.remove('show');
     if (reasonsDone) reasonsDone.classList.remove('show');
     updateReasonProgress();
@@ -3169,21 +3179,17 @@
       collectedSet.add(i);
       collectedCount += 1;
       updateReasonProgress();
-      if (reasonHand) {
-        const card = document.createElement('button');
-        card.className = 'reason-hand-card';
-        card.type = 'button';
-        card.dataset.index = String(i);
-        card.style.setProperty('--fc', reasonPalette[i % reasonPalette.length]);
+      if (reasonBoard) {
+        const card = document.createElement('span');
+        card.className = 'reason-back-card';
         card.textContent = i + 1;
-        card.addEventListener('click', (e) => {
-          e.stopPropagation();
-          openReasonModal(Number(card.dataset.index));
-        });
-        reasonHand.appendChild(card);
+        reasonBoard.appendChild(card);
         spawnReasonBurst(card);
       }
       if (collectedCount === REASONS.length) {
+        if (reasonDeck) {
+          window.setTimeout(() => { reasonDeck.style.display = 'none'; }, 500);
+        }
         pendingCelebration = true;
         window.setTimeout(() => {
           if (pendingCelebration) {
