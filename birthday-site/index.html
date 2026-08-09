@@ -968,38 +968,58 @@
     color: #8a4a25;
   }
   .letter-envelope {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 25;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
+    padding: 22px;
     border: 0;
     background:
-      linear-gradient(180deg, rgba(255, 238, 210, .97), rgba(255, 224, 182, .97)),
-      radial-gradient(circle at 50% 42%, rgba(255, 220, 170, .9), transparent 62%);
+      radial-gradient(circle at 50% 38%, rgba(255, 150, 175, .16), transparent 48%),
+      radial-gradient(circle at 16% 80%, rgba(255, 210, 145, .10), transparent 36%),
+      radial-gradient(circle at 86% 18%, rgba(255, 140, 170, .12), transparent 32%),
+      linear-gradient(155deg, #3a1422 0%, #261019 52%, #160b0f 100%);
     cursor: pointer;
   }
   .letter-envelope.open {
     pointer-events: none;
     animation: envelope-fade .55s ease .42s forwards;
   }
+  .envelope-spark {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    color: rgba(255, 190, 205, .85);
+    font-size: clamp(14px, 4vw, 24px);
+    line-height: 1;
+    text-shadow: 0 0 16px rgba(255, 150, 175, .85);
+    animation: envelope-spark-float 3.2s ease-in-out var(--d) infinite;
+    pointer-events: none;
+  }
   .envelope-card {
     position: relative;
-    width: min(82vw, 520px);
-    aspect-ratio: 5 / 3.4;
-    background: linear-gradient(180deg, #fff8ec, #f3dfc3);
-    border-radius: 10px;
-    box-shadow: 0 30px 70px rgba(60, 25, 15, .35), 0 0 0 1px rgba(120, 70, 30, .18);
+    width: min(84vw, 480px);
+    aspect-ratio: 5 / 3.45;
+    background:
+      radial-gradient(circle at 28% 18%, rgba(255, 255, 255, .7), transparent 46%),
+      radial-gradient(circle at 72% 82%, rgba(255, 205, 220, .35), transparent 48%),
+      linear-gradient(160deg, #fffaf2, #f8e6e9 58%, #f2d4d3);
+    border: 1px solid rgba(190, 120, 135, .35);
+    border-radius: 14px;
+    box-shadow:
+      0 34px 80px rgba(10, 2, 8, .55),
+      0 0 0 1px rgba(255, 255, 255, .4) inset,
+      0 0 34px rgba(255, 160, 185, .22);
     overflow: hidden;
   }
   .envelope-back {
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(135deg, rgba(210, 140, 90, .08), transparent 45%),
-      linear-gradient(315deg, rgba(210, 140, 90, .08), transparent 45%);
+      linear-gradient(135deg, rgba(220, 130, 155, .08), transparent 45%),
+      linear-gradient(315deg, rgba(220, 130, 155, .08), transparent 45%);
   }
   .envelope-flap {
     position: absolute;
@@ -1007,7 +1027,7 @@
     right: 0;
     top: 0;
     height: 46%;
-    background: linear-gradient(180deg, #f7e6cd, #ecd2ae);
+    background: linear-gradient(180deg, #fbe0df, #efc9cc);
     clip-path: polygon(0 0, 100% 0, 50% 100%);
     transform-origin: top center;
     z-index: 3;
@@ -1021,43 +1041,48 @@
   .envelope-top-line {
     position: absolute;
     left: 50%;
-    top: 17%;
+    top: 16%;
     transform: translateX(-50%);
-    color: rgba(138, 74, 37, .75);
+    color: #b85c76;
     font-size: clamp(14px, 3vw, 18px);
-    letter-spacing: .3em;
+    letter-spacing: .32em;
     white-space: nowrap;
     z-index: 4;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .55);
   }
   .envelope-seal {
     position: absolute;
     left: 50%;
     top: 38%;
     transform: translate(-50%, -50%);
-    width: 62px;
-    height: 62px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #e35d6e, #b2264a 72%);
+    background: radial-gradient(circle at 35% 30%, #ff9db4, #d94f72 72%);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 28px;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, .25);
+    box-shadow: 0 8px 18px rgba(150, 40, 70, .4), 0 0 0 3px rgba(255, 255, 255, .35);
     z-index: 4;
   }
   .envelope-copy {
     position: absolute;
     left: 50%;
-    bottom: 13%;
+    bottom: 12%;
     transform: translateX(-50%);
-    color: #8a4a25;
+    color: #b85c76;
     font-size: clamp(18px, 4vw, 26px);
     font-weight: 700;
-    letter-spacing: .12em;
+    letter-spacing: .14em;
     white-space: nowrap;
     z-index: 4;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, .6);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .65);
+  }
+  @keyframes envelope-spark-float {
+    0%, 100% { opacity: .25; transform: translateY(0) scale(.8); }
+    50% { opacity: .9; transform: translateY(-12px) scale(1.05); }
   }
   @keyframes envelope-flap-open {
     to { transform: rotateX(150deg); }
@@ -1783,6 +1808,10 @@
     <section class="scene scene-letter" id="letterScene">
       <div class="floating-hearts" id="letterHearts" aria-hidden="true"></div>
       <button class="letter-envelope" id="letterEnvelope" type="button" aria-label="打开信封">
+        <span class="envelope-spark" style="--x:12%;--y:22%;--d:0s">✦</span>
+        <span class="envelope-spark" style="--x:84%;--y:24%;--d:.7s">♥</span>
+        <span class="envelope-spark" style="--x:18%;--y:78%;--d:1.2s">♥</span>
+        <span class="envelope-spark" style="--x:82%;--y:72%;--d:.3s">✦</span>
         <span class="envelope-card">
           <span class="envelope-back"></span>
           <span class="envelope-flap"></span>
