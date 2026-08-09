@@ -956,9 +956,11 @@
     position: absolute;
     inset: 0;
     display: none;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    padding: 64px 20px 92px;
+    align-content: start;
+    justify-content: center;
+    grid-template-columns: repeat(5, 56px);
+    gap: 10px;
+    padding: 64px 18px 92px;
     overflow-y: auto;
     scrollbar-width: none;
     z-index: 5;
@@ -969,38 +971,65 @@
   .reasons-grid::-webkit-scrollbar {
     display: none;
   }
-  .reason-card {
-    position: relative;
-    aspect-ratio: 4 / 5;
-    border: 0;
-    padding: 0;
-    background: none;
-    cursor: pointer;
-    perspective: 900px;
+  @media (min-width: 761px) {
+    .reasons-grid {
+      grid-template-columns: repeat(11, 56px);
+    }
   }
-  .reason-card-inner {
+  .reason-chip {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    border: 0;
+    border-radius: 16px;
+    background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
+    color: #fff;
+    font-size: 20px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .28);
+    transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+  }
+  .reason-chip:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, .36);
+  }
+  .reason-chip.viewed {
+    opacity: .72;
+  }
+  .reason-modal {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 3, 8, .74);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .35s ease, visibility .35s ease;
+  }
+  .reason-modal.show {
+    opacity: 1;
+    visibility: visible;
+  }
+  .reason-modal-card {
+    position: relative;
+    width: min(78vw, 440px);
+    aspect-ratio: 3 / 4;
+    perspective: 1000px;
+  }
+  .reason-modal-inner {
     position: absolute;
     inset: 0;
     transform-style: preserve-3d;
-    transition: transform .55s ease;
+    transition: transform .6s ease;
   }
-  .reason-card.flipped .reason-card-inner {
+  .reason-modal-card.flipped .reason-modal-inner {
     transform: rotateY(180deg);
   }
-  .reason-front,
-  .reason-back {
-    position: absolute;
-    inset: 0;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    border-radius: 12px;
-    text-align: center;
-  }
-  .reason-front {
+  .reason-modal-front,
+  .reason-modal-back {
     position: absolute;
     inset: 0;
     backface-visibility: hidden;
@@ -1009,60 +1038,70 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    padding: 8px;
-    border-radius: 14px;
+    gap: 10px;
+    padding: 26px;
+    border-radius: 18px;
     text-align: center;
+  }
+  .reason-modal-front {
     background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
-    border: 1px solid rgba(255, 255, 255, .45);
     color: #fff;
-    font-size: clamp(28px, 8vw, 46px);
+    font-size: clamp(64px, 18vw, 120px);
     font-weight: 800;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, .25);
-    box-shadow: 0 14px 30px rgba(0, 0, 0, .32);
+    text-shadow: 0 3px 14px rgba(0, 0, 0, .25);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .45);
   }
-  .reason-front::after {
+  .reason-modal-front::after {
     content: "♥";
-    font-size: 12px;
-    opacity: .75;
-    text-shadow: none;
+    font-size: 18px;
+    opacity: .8;
   }
-  .reason-back {
-    position: absolute;
-    inset: 0;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
+  .reason-modal-back {
     transform: rotateY(180deg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 10px;
-    border-radius: 14px;
-    text-align: center;
     background:
-      radial-gradient(circle at 28% 18%, rgba(255, 255, 255, .8), transparent 46%),
+      radial-gradient(circle at 28% 18%, rgba(255, 255, 255, .85), transparent 46%),
       linear-gradient(160deg, #fffaf4, #ffe9ef 60%, #ffdbe2);
-    border: 1px solid rgba(255, 255, 255, .9);
     color: #8a3f58;
-    font-size: clamp(14px, 3.6vw, 18px);
+    font-size: clamp(18px, 4.6vw, 26px);
     font-weight: 600;
-    line-height: 1.55;
-    box-shadow: 0 14px 30px rgba(0, 0, 0, .32);
+    line-height: 1.8;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .45);
   }
-  .reason-back::before {
+  .reason-modal-back::before {
     content: "“";
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     color: #e58aa4;
-    font-size: 22px;
+    font-size: 34px;
     line-height: 1;
   }
-  .reason-card:hover .reason-card-inner {
-    transform: translateY(-3px);
+  .reason-modal-close,
+  .reason-modal-nav {
+    position: absolute;
+    z-index: 22;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, .4);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
   }
-  .reason-card.flipped:hover .reason-card-inner {
-    transform: rotateY(180deg) translateY(-3px);
+  .reason-modal-close {
+    top: 24px;
+    right: 24px;
+  }
+  .reason-modal-nav.prev {
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .reason-modal-nav.next {
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
   }
   .reason-burst {
     position: absolute;
@@ -1102,11 +1141,11 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    z-index: 12;
+    z-index: 24;
     padding: 18px 26px;
     border: 1px solid rgba(255, 215, 150, .5);
     border-radius: 16px;
-    background: rgba(20, 8, 14, .88);
+    background: rgba(20, 8, 14, .9);
     color: #ffe6a3;
     font-size: clamp(16px, 4vw, 22px);
     letter-spacing: .1em;
@@ -1122,16 +1161,16 @@
     visibility: visible;
     transform: translate(-50%, -50%) scale(1);
   }
-  .reasons-grid.celebrate .reason-card {
-    animation: card-pop .55s ease;
+  .reasons-grid.celebrate .reason-chip {
+    animation: chip-pop .55s ease;
   }
   @keyframes reason-burst {
     from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     to { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(.2); }
   }
-  @keyframes card-pop {
+  @keyframes chip-pop {
     0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+    50% { transform: scale(1.08); }
     100% { transform: scale(1); }
   }
   .reasons-next {
@@ -1139,7 +1178,7 @@
     left: 50%;
     bottom: 18px;
     transform: translateX(-50%);
-    z-index: 8;
+    z-index: 25;
     padding: 10px 26px;
     border: 1px solid rgba(255, 215, 150, .5);
     border-radius: 999px;
@@ -1148,11 +1187,6 @@
     font-size: 14px;
     letter-spacing: .16em;
     cursor: pointer;
-  }
-  @media (max-width: 760px) {
-    .reasons-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
   }
   .scene-ending {
     background:
@@ -2142,11 +2176,23 @@
         <span>轻触翻开</span>
       </div>
       <div class="reasons-progress" id="reasonsProgress">已翻开 0 / 22</div>
-      <div class="reasons-done" id="reasonsDone">你把所有理由都找到了</div>
       <div class="reasons-grid" id="reasonsGrid"></div>
+      <div class="reasons-done" id="reasonsDone">你把所有理由都找到了</div>
+      <div class="reason-modal" id="reasonModal">
+        <button class="reason-modal-close" id="reasonModalClose" type="button" aria-label="关闭">×</button>
+        <button class="reason-modal-nav prev" id="reasonModalPrev" type="button" aria-label="上一条">‹</button>
+        <div class="reason-modal-card" id="reasonModalCard">
+          <span class="reason-modal-inner">
+            <span class="reason-modal-front" id="reasonModalFront"></span>
+            <span class="reason-modal-back" id="reasonModalBack"></span>
+          </span>
+        </div>
+        <button class="reason-modal-nav next" id="reasonModalNext" type="button" aria-label="下一条">›</button>
+      </div>
       <button class="reasons-next" id="reasonsNextBtn" type="button">继续</button>
     </section>
 
+    <section class="scene scene-ending" id="endingScene">
     <section class="scene scene-ending" id="endingScene">
       <div class="ending-stars" id="endingStars" aria-hidden="true"></div>
       <div class="ending-heart-rain" id="endingHeartRain" aria-hidden="true"></div>
@@ -2843,6 +2889,13 @@
   const reasonsNextBtn = document.getElementById('reasonsNextBtn');
   const reasonsProgress = document.getElementById('reasonsProgress');
   const reasonsDone = document.getElementById('reasonsDone');
+  const reasonModal = document.getElementById('reasonModal');
+  const reasonModalCard = document.getElementById('reasonModalCard');
+  const reasonModalFront = document.getElementById('reasonModalFront');
+  const reasonModalBack = document.getElementById('reasonModalBack');
+  const reasonModalPrev = document.getElementById('reasonModalPrev');
+  const reasonModalNext = document.getElementById('reasonModalNext');
+  const reasonModalClose = document.getElementById('reasonModalClose');
   const reasonPalette = [
     'linear-gradient(155deg, #ff9db4, #d94f72)',
     'linear-gradient(155deg, #ffd98a, #e6a33f)',
@@ -2852,30 +2905,36 @@
   ];
   const burstColors = ['#ffd98a', '#ff8fa3', '#8fd3c7', '#fff0d0', '#b8a7e8'];
   let reasonsCoverOpen = true;
-  let flippedCount = 0;
+  let viewedCount = 0;
+  let currentReason = 0;
+  const viewedSet = new Set();
   function updateReasonProgress() {
-    if (reasonsProgress) reasonsProgress.textContent = `已翻开 ${flippedCount} / ${REASONS.length}`;
+    if (reasonsProgress) reasonsProgress.textContent = `已翻开 ${viewedCount} / ${REASONS.length}`;
   }
-  function spawnReasonBurst(card) {
+  function spawnReasonBurst(container) {
+    if (!container) return;
     for (let i = 0; i < 6; i++) {
       const s = document.createElement('span');
       s.className = 'reason-burst';
       s.style.setProperty('--c', burstColors[i % burstColors.length]);
-      s.style.setProperty('--tx', `${(Math.random() * 56 - 28).toFixed(1)}px`);
-      s.style.setProperty('--ty', `${(Math.random() * 56 - 28).toFixed(1)}px`);
-      card.appendChild(s);
+      s.style.setProperty('--tx', `${(Math.random() * 70 - 35).toFixed(1)}px`);
+      s.style.setProperty('--ty', `${(Math.random() * 70 - 35).toFixed(1)}px`);
+      container.appendChild(s);
       window.setTimeout(() => s.remove(), 750);
     }
   }
   function resetReasons() {
     reasonsCoverOpen = true;
-    flippedCount = 0;
+    viewedCount = 0;
+    currentReason = 0;
+    viewedSet.clear();
     if (reasonsScene) reasonsScene.classList.remove('active');
     if (reasonsCover) reasonsCover.classList.remove('hide');
     if (reasonsGrid) {
       reasonsGrid.classList.remove('show', 'celebrate');
-      reasonsGrid.querySelectorAll('.reason-card.flipped').forEach((card) => card.classList.remove('flipped'));
+      reasonsGrid.querySelectorAll('.reason-chip.viewed').forEach((chip) => chip.classList.remove('viewed'));
     }
+    if (reasonModal) reasonModal.classList.remove('show');
     if (reasonsDone) reasonsDone.classList.remove('show');
     updateReasonProgress();
   }
@@ -2886,15 +2945,43 @@
     if (reasonsScene) reasonsScene.classList.add('active');
     if (reasonsGrid) reasonsGrid.classList.add('show');
   }
+  function showReason(i) {
+    currentReason = (i + REASONS.length) % REASONS.length;
+    if (reasonModalFront) reasonModalFront.textContent = currentReason + 1;
+    if (reasonModalBack) reasonModalBack.textContent = REASONS[currentReason];
+    if (reasonModalCard) {
+      reasonModalCard.classList.remove('flipped');
+      void reasonModalCard.offsetWidth;
+      reasonModalCard.classList.add('flipped');
+    }
+    spawnReasonBurst(reasonModalCard);
+    if (!viewedSet.has(currentReason)) {
+      viewedSet.add(currentReason);
+      viewedCount += 1;
+      updateReasonProgress();
+      const chip = reasonsGrid ? reasonsGrid.querySelector(`.reason-chip[data-index="${currentReason}"]`) : null;
+      if (chip) chip.classList.add('viewed');
+      if (viewedCount === REASONS.length) {
+        if (reasonsDone) reasonsDone.classList.add('show');
+        if (reasonsGrid) reasonsGrid.classList.add('celebrate');
+        window.setTimeout(() => {
+          if (reasonsDone) reasonsDone.classList.remove('show');
+          if (reasonsGrid) reasonsGrid.classList.remove('celebrate');
+        }, 2600);
+      }
+    }
+  }
+  function openReasonModal(i) {
+    if (reasonModal) reasonModal.classList.add('show');
+    showReason(i);
+  }
+  function closeReasonModal() {
+    if (reasonModal) reasonModal.classList.remove('show');
+  }
   function renderReasons() {
     if (!reasonsGrid) return;
     reasonsGrid.innerHTML = REASONS.map((reason, i) => `
-      <button class="reason-card" type="button" style="--fc:${reasonPalette[i % reasonPalette.length]}" aria-label="理由 ${i + 1}">
-        <span class="reason-card-inner">
-          <span class="reason-front">${i + 1}</span>
-          <span class="reason-back">${reason}</span>
-        </span>
-      </button>`).join('');
+      <button class="reason-chip" type="button" data-index="${i}" style="--fc:${reasonPalette[i % reasonPalette.length]}" aria-label="理由 ${i + 1}">${i + 1}</button>`).join('');
   }
   renderReasons();
   if (reasonsCover) {
@@ -2906,20 +2993,38 @@
   if (reasonsGrid) {
     reasonsGrid.addEventListener('click', (e) => {
       e.stopPropagation();
-      const card = e.target.closest('.reason-card');
-      if (!card || card.classList.contains('flipped')) return;
-      card.classList.add('flipped');
-      flippedCount += 1;
-      updateReasonProgress();
-      spawnReasonBurst(card);
-      if (flippedCount === REASONS.length) {
-        if (reasonsDone) reasonsDone.classList.add('show');
-        if (reasonsGrid) reasonsGrid.classList.add('celebrate');
-        window.setTimeout(() => {
-          if (reasonsDone) reasonsDone.classList.remove('show');
-          if (reasonsGrid) reasonsGrid.classList.remove('celebrate');
-        }, 2600);
-      }
+      const chip = e.target.closest('.reason-chip');
+      if (chip) openReasonModal(Number(chip.dataset.index));
+    });
+  }
+  if (reasonModalCard) {
+    reasonModalCard.addEventListener('click', (e) => {
+      e.stopPropagation();
+      reasonModalCard.classList.toggle('flipped');
+      spawnReasonBurst(reasonModalCard);
+    });
+  }
+  if (reasonModalPrev) {
+    reasonModalPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showReason(currentReason - 1);
+    });
+  }
+  if (reasonModalNext) {
+    reasonModalNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showReason(currentReason + 1);
+    });
+  }
+  if (reasonModalClose) {
+    reasonModalClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeReasonModal();
+    });
+  }
+  if (reasonModal) {
+    reasonModal.addEventListener('click', (e) => {
+      if (e.target === reasonModal) closeReasonModal();
     });
   }
   if (reasonsNextBtn) {
