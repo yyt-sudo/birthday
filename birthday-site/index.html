@@ -1041,12 +1041,7 @@
     transition: opacity .45s ease;
   }
   .reason-current-front {
-    background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
-    color: #fff;
-    font-size: clamp(56px, 16vw, 100px);
-    font-weight: 800;
-    text-shadow: 0 3px 14px rgba(0, 0, 0, .25);
-    opacity: 1;
+    display: none;
   }
   .reason-current-front::after {
     content: "♥";
@@ -1061,7 +1056,7 @@
     font-size: clamp(17px, 4.4vw, 24px);
     font-weight: 600;
     line-height: 1.8;
-    opacity: 0;
+    opacity: 1;
   }
   .reason-current-back::before {
     content: "♥";
@@ -1311,44 +1306,15 @@
     position: absolute;
     inset: 0;
     z-index: 30;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    background:
-      radial-gradient(circle at 50% 40%, rgba(255, 170, 195, .30), transparent 60%),
-      radial-gradient(circle at 20% 80%, rgba(255, 210, 150, .16), transparent 40%),
-      linear-gradient(155deg, #552036 0%, #351524 55%, #1d0d13 100%);
+    background: transparent;
     opacity: 0;
     visibility: hidden;
     transition: opacity .5s ease, visibility .5s ease;
     pointer-events: none;
-    text-align: center;
   }
   .reasons-done.show {
     opacity: 1;
     visibility: visible;
-  }
-  .reasons-done-heart {
-    font-size: clamp(84px, 24vw, 160px);
-    line-height: 1;
-    color: #ff7c9c;
-    text-shadow: 0 0 40px rgba(255, 124, 156, .9), 0 0 100px rgba(255, 160, 185, .5);
-    animation: heart-beat 1.2s ease-in-out infinite;
-  }
-  .reasons-done .done-title {
-    margin: 0;
-    font-size: clamp(28px, 6vw, 44px);
-    font-weight: 800;
-    color: #ffd98a;
-    text-shadow: 0 0 24px rgba(255, 214, 130, .6);
-  }
-  .reasons-done .done-line {
-    margin: 0;
-    font-size: clamp(18px, 4.4vw, 28px);
-    line-height: 1.7;
-    color: rgba(255, 230, 180, .96);
   }
   .reasons-done-float {
     position: absolute;
@@ -2470,9 +2436,6 @@
         <span class="reason-firework" style="--x:70%;--y:78%;--c:#b8a7e8;--delay:1.3s"></span>
         <span class="reason-firework" style="--x:12%;--y:52%;--c:#ffb37d;--delay:1.7s"></span>
         <span class="reason-firework" style="--x:88%;--y:50%;--c:#ffe6a3;--delay:2.1s"></span>
-        <span class="reasons-done-heart">♥</span>
-        <p class="done-title">彩蛋</p>
-        <p class="done-line">没有理由，就是想一直喜欢你</p>
       </div>
       <div class="reason-modal" id="reasonModal">
         <button class="reason-modal-close" id="reasonModalClose" type="button" aria-label="关闭">×</button>
@@ -3274,14 +3237,12 @@
       clearTimeout(currentCleanupTimer);
       currentCleanupTimer = null;
     }
-    if (reasonCurrentFront) reasonCurrentFront.textContent = i + 1;
     if (reasonCurrentBack) reasonCurrentBack.textContent = REASONS[i];
     if (reasonCurrent) {
       reasonCurrent.style.setProperty('--fc', reasonPalette[i % reasonPalette.length]);
-      reasonCurrent.classList.remove('show-reason', 'collecting');
+      reasonCurrent.classList.remove('collecting');
       void reasonCurrent.offsetWidth;
       reasonCurrent.classList.add('dealt');
-      window.setTimeout(() => reasonCurrent.classList.add('show-reason'), 300);
     }
     if (reasonDeck) reasonDeck.classList.add('disabled');
   }
