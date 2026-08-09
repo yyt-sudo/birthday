@@ -899,6 +899,148 @@
   .stage.scene-letter .letter-sign {
     opacity: 1;
   }
+  .scene-reasons {
+    background:
+      linear-gradient(180deg, rgba(255, 214, 150, .07), transparent 45%),
+      linear-gradient(155deg, #3d1523 0%, #271019 52%, #160b0f 100%);
+  }
+  .reasons-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    text-align: center;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(255, 165, 195, .18), transparent 50%),
+      linear-gradient(155deg, #3d1523 0%, #271019 52%, #160b0f 100%);
+    opacity: 1;
+    visibility: visible;
+    transition: opacity .5s ease, visibility .5s ease;
+  }
+  .reasons-cover.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .reasons-cover h2 {
+    margin: 0;
+    color: #ffd98a;
+    font-size: clamp(52px, 16vw, 120px);
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-shadow: 0 0 24px rgba(255, 214, 130, .55), 0 0 60px rgba(255, 160, 185, .35);
+  }
+  .reasons-cover p {
+    margin: 0;
+    color: rgba(255, 220, 205, .9);
+    font-size: clamp(15px, 4vw, 20px);
+    letter-spacing: .12em;
+    line-height: 1.8;
+  }
+  .reasons-cover span {
+    margin-top: 8px;
+    padding: 10px 24px;
+    border: 1px solid rgba(255, 215, 150, .5);
+    border-radius: 999px;
+    color: #ffe6a3;
+    font-size: 14px;
+    letter-spacing: .18em;
+    background: rgba(255, 215, 150, .12);
+  }
+  .reasons-grid {
+    position: absolute;
+    inset: 0;
+    display: none;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 22px 20px 84px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    z-index: 5;
+  }
+  .reasons-grid.show {
+    display: grid;
+  }
+  .reasons-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .reason-card {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border: 0;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+    perspective: 900px;
+  }
+  .reason-card-inner {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform .55s ease;
+  }
+  .reason-card.flipped .reason-card-inner {
+    transform: rotateY(180deg);
+  }
+  .reason-front,
+  .reason-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 12px;
+    text-align: center;
+  }
+  .reason-front {
+    background:
+      radial-gradient(circle at 32% 24%, rgba(255, 180, 200, .25), transparent 45%),
+      linear-gradient(155deg, #552036, #351524);
+    border: 1px solid rgba(255, 215, 150, .35);
+    color: #ffd98a;
+    font-size: clamp(22px, 6vw, 34px);
+    font-weight: 800;
+    text-shadow: 0 0 16px rgba(255, 214, 130, .5);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, .3);
+  }
+  .reason-back {
+    transform: rotateY(180deg);
+    background:
+      linear-gradient(160deg, #fffaf4, #ffe5eb 60%, #ffd7de);
+    border: 1px solid rgba(255, 255, 255, .8);
+    color: #8a3f58;
+    font-size: clamp(12px, 2.6vw, 15px);
+    font-weight: 600;
+    line-height: 1.5;
+    box-shadow: 0 12px 26px rgba(0, 0, 0, .3);
+  }
+  .reasons-next {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    z-index: 8;
+    padding: 10px 26px;
+    border: 1px solid rgba(255, 215, 150, .5);
+    border-radius: 999px;
+    background: rgba(255, 215, 150, .16);
+    color: #ffe6a3;
+    font-size: 14px;
+    letter-spacing: .16em;
+    cursor: pointer;
+  }
+  @media (max-width: 760px) {
+    .reasons-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
   .scene-ending {
     background:
       linear-gradient(180deg, rgba(255, 214, 150, .08), transparent 45%),
@@ -1880,6 +2022,16 @@
       </div>
     </section>
 
+    <section class="scene scene-reasons" id="reasonsScene">
+      <div class="reasons-cover" id="reasonsCover">
+        <h2>22 个理由</h2>
+        <p>关于你，我有一万个理由，先写 22 个</p>
+        <span>轻触翻开</span>
+      </div>
+      <div class="reasons-grid" id="reasonsGrid"></div>
+      <button class="reasons-next" id="reasonsNextBtn" type="button">继续</button>
+    </section>
+
     <section class="scene scene-ending" id="endingScene">
       <div class="ending-stars" id="endingStars" aria-hidden="true"></div>
       <div class="ending-heart-rain" id="endingHeartRain" aria-hidden="true"></div>
@@ -2546,7 +2698,77 @@
   }
   showPhotoPage(0);
 
-  const sceneNames = ['greeting', 'cake', 'letter', 'photos', 'ending'];
+  const REASONS = [
+    '因为你的笑容，是我一天里最想看见的风景。',
+    '因为再平常的话，你也愿意认真听完。',
+    '因为看你认真吃饭的样子，人间忽然就值得了。',
+    '因为那些我没说出口的在意，你都悄悄记住了。',
+    '因为你连生气都像一场来得快去得快的雨。',
+    '因为你对小动物毫无抵抗力，眼里会发光。',
+    '因为你说“随便”的时候，心里其实早已有了答案。',
+    '因为我的随口一句玩笑，你都会放在心上认真回应。',
+    '因为和你在一起，连赖床的早晨都有了期待。',
+    '因为睡熟之后，你总会不自觉地靠向我。',
+    '因为你的笑点很低，但每一笑都是真的。',
+    '因为夜深了，你还会悄悄抢走半张被子。',
+    '因为一点点小事，就能让你开心很久很久。',
+    '因为你说“我爱你”的时候，眉眼都是弯的。',
+    '因为好吃的东西，你总舍不得一口气吃完。',
+    '因为就算迷路了，你也倔强地说“我知道怎么走”。',
+    '因为和你在一起，沉默也不会尴尬。',
+    '因为惊醒的深夜，你会迷迷糊糊地靠近我。',
+    '因为我不说话的时候，你也懂我在想什么。',
+    '因为想把所有好吃的第一口，都留给你。',
+    '因为再普通的日子，和你一起就变得有意思。',
+    '因为第 22 个理由，是“没有理由，就是想一直喜欢你”。'
+  ];
+  const reasonsScene = document.getElementById('reasonsScene');
+  const reasonsCover = document.getElementById('reasonsCover');
+  const reasonsGrid = document.getElementById('reasonsGrid');
+  const reasonsNextBtn = document.getElementById('reasonsNextBtn');
+  let reasonsCoverOpen = true;
+  function resetReasons() {
+    reasonsCoverOpen = true;
+    if (reasonsCover) reasonsCover.classList.remove('hide');
+    if (reasonsGrid) reasonsGrid.classList.remove('show');
+  }
+  function openReasons() {
+    if (!reasonsCoverOpen) return;
+    reasonsCoverOpen = false;
+    if (reasonsCover) reasonsCover.classList.add('hide');
+    if (reasonsGrid) reasonsGrid.classList.add('show');
+  }
+  function renderReasons() {
+    if (!reasonsGrid) return;
+    reasonsGrid.innerHTML = REASONS.map((reason, i) => `
+      <button class="reason-card" type="button" aria-label="理由 ${i + 1}">
+        <span class="reason-card-inner">
+          <span class="reason-front">${i + 1}</span>
+          <span class="reason-back">${reason}</span>
+        </span>
+      </button>`).join('');
+  }
+  renderReasons();
+  if (reasonsCover) {
+    reasonsCover.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openReasons();
+    });
+  }
+  if (reasonsGrid) {
+    reasonsGrid.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const card = e.target.closest('.reason-card');
+      if (card) card.classList.toggle('flipped');
+    });
+  }
+  if (reasonsNextBtn) {
+    reasonsNextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setScene(5);
+    });
+  }
+  const sceneNames = ['greeting', 'cake', 'letter', 'photos', 'reasons', 'ending'];
   let scene = 0;
   function setScene(next) {
     scene = next;
@@ -2561,12 +2783,15 @@
       if (cakeScene) cakeScene.classList.remove('bursting', 'wished');
       resetWishGlow();
       resetLetterEnvelope();
+      resetReasons();
       if (wishPrompt) wishPrompt.style.opacity = '';
       if (wishBurst) wishBurst.classList.remove('show');
     } else if (next === 1) {
       hintText.textContent = candlesBlown ? '轻触屏幕继续' : '许愿 · 点击蜡烛吹灭';
     } else if (next === 2) {
       hintText.textContent = '轻触屏幕继续';
+    } else if (next === 4) {
+      hintText.textContent = '轻触翻开 22 个理由';
     } else {
       hintText.textContent = '轻触屏幕';
     }
@@ -2580,7 +2805,10 @@
       preloadThumbs(1);
       showPhotoPage(0);
     }
-    if (next === 4) fadeBgm(0.12);
+    if (scene === 4) {
+      resetReasons();
+    }
+    if (next === 5) fadeBgm(0.12);
     else fadeBgm(1);
   }
 
@@ -2811,6 +3039,9 @@
     }
     else if (scene === 3 && photoPage === 0) showPhotoPage(1);
     else if (scene === 3 && photoPage === 1) setScene(4);
+    else if (scene === 4) {
+      if (reasonsCoverOpen) openReasons();
+    }
   });
 
   document.addEventListener('keydown', (e) => {
@@ -2837,6 +3068,9 @@
       }
       else if (scene === 3 && photoPage === 0) showPhotoPage(1);
       else if (scene === 3 && photoPage === 1) setScene(4);
+      else if (scene === 4) {
+        if (reasonsCoverOpen) openReasons();
+      }
     }
   });
 </script>
