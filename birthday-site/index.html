@@ -1024,18 +1024,11 @@
   .reason-current-inner {
     position: absolute;
     inset: 0;
-    transform-style: preserve-3d;
-    transition: transform .55s ease;
-  }
-  .reason-current.flipped .reason-current-inner {
-    transform: rotateY(180deg);
   }
   .reason-current-front,
   .reason-current-back {
     position: absolute;
     inset: 0;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1045,6 +1038,7 @@
     border-radius: 18px;
     text-align: center;
     box-shadow: 0 30px 70px rgba(0, 0, 0, .5);
+    transition: opacity .45s ease;
   }
   .reason-current-front {
     background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
@@ -1052,6 +1046,7 @@
     font-size: clamp(56px, 16vw, 100px);
     font-weight: 800;
     text-shadow: 0 3px 14px rgba(0, 0, 0, .25);
+    opacity: 1;
   }
   .reason-current-front::after {
     content: "♥";
@@ -1059,7 +1054,6 @@
     opacity: .8;
   }
   .reason-current-back {
-    transform: rotateY(180deg);
     background:
       radial-gradient(circle at 28% 18%, rgba(255, 255, 255, .85), transparent 46%),
       linear-gradient(160deg, #fffaf4, #ffe9ef 60%, #ffdbe2);
@@ -1067,6 +1061,7 @@
     font-size: clamp(17px, 4.4vw, 24px);
     font-weight: 600;
     line-height: 1.8;
+    opacity: 0;
   }
   .reason-current-back::before {
     content: "♥";
@@ -1075,6 +1070,12 @@
     color: #e58aa4;
     font-size: 22px;
     line-height: 1;
+  }
+  .reason-current.show-reason .reason-current-front {
+    opacity: 0;
+  }
+  .reason-current.show-reason .reason-current-back {
+    opacity: 1;
   }
   .reason-board {
     position: absolute;
@@ -1356,6 +1357,66 @@
     opacity: 0;
     animation: done-float 2.6s ease-in-out infinite;
     pointer-events: none;
+  }
+  .reason-balloon {
+    position: absolute;
+    width: 34px;
+    height: 44px;
+    border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+    background: var(--bc);
+    opacity: 0;
+    animation: balloon-rise var(--bd) ease-in var(--delay) forwards;
+    pointer-events: none;
+  }
+  .reason-balloon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -12px;
+    width: 2px;
+    height: 14px;
+    background: rgba(255, 255, 255, .45);
+    transform: translateX(-50%);
+  }
+  .reason-firework {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: 0 0 12px var(--c);
+    opacity: 0;
+    animation: firework-burst 1.8s ease-out var(--delay) infinite;
+    pointer-events: none;
+  }
+  .reason-firework::before,
+  .reason-firework::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 2px;
+    height: 26px;
+    background: var(--c);
+    opacity: .8;
+  }
+  .reason-firework::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  .reason-firework::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+  }
+  @keyframes balloon-rise {
+    0% { opacity: 0; transform: translateY(30vh) translateX(0); }
+    15% { opacity: .9; }
+    100% { opacity: .2; transform: translateY(-42vh) translateX(var(--sw, 20px)); }
+  }
+  @keyframes firework-burst {
+    0%, 100% { opacity: 0; transform: scale(.2); }
+    10% { opacity: 1; }
+    35% { opacity: 0; transform: scale(1.6); }
   }
   @keyframes done-float {
     0%, 100% { opacity: 0; transform: translateY(6px) scale(.7); }
@@ -2371,7 +2432,7 @@
 
     <section class="scene scene-reasons" id="reasonsScene">
       <div class="reasons-cover" id="reasonsCover">
-        <h2>22 个理由</h2>
+        <h2>22个理由</h2>
         <p>每一张，都是一句想对你说的话</p>
         <span>轻点牌堆，开始发牌</span>
       </div>
@@ -2397,6 +2458,18 @@
         <span class="reasons-done-float" style="left:68%;top:14%;animation-delay:2s">✦</span>
         <span class="reasons-done-float" style="left:24%;top:82%;animation-delay:2.4s">✦</span>
         <span class="reasons-done-float" style="left:74%;top:84%;animation-delay:2.8s">♥</span>
+        <span class="reason-balloon" style="--bc:linear-gradient(180deg,#ff9db4,#d94f72);left:10%;bottom:6%;--bd:6s;--delay:0s;--sw:24px"></span>
+        <span class="reason-balloon" style="--bc:linear-gradient(180deg,#ffd98a,#e6a33f);left:28%;bottom:4%;--bd:7s;--delay:.6s;--sw:-20px"></span>
+        <span class="reason-balloon" style="--bc:linear-gradient(180deg,#8fd3c7,#4e9a8f);left:52%;bottom:8%;--bd:6.5s;--delay:1.1s;--sw:26px"></span>
+        <span class="reason-balloon" style="--bc:linear-gradient(180deg,#b8a7e8,#7d6bc4);left:72%;bottom:5%;--bd:7.5s;--delay:1.6s;--sw:-22px"></span>
+        <span class="reason-balloon" style="--bc:linear-gradient(180deg,#ffb37d,#e0704a);left:86%;bottom:9%;--bd:6.8s;--delay:2.1s;--sw:18px"></span>
+        <span class="reason-balloon" style="--bc:linear-gradient(180deg,#ffc3cf,#e06d95);left:42%;bottom:2%;--bd:7.2s;--delay:2.6s;--sw:-26px"></span>
+        <span class="reason-firework" style="--x:18%;--y:26%;--c:#ffd98a;--delay:0s"></span>
+        <span class="reason-firework" style="--x:82%;--y:22%;--c:#ff8fa3;--delay:.4s"></span>
+        <span class="reason-firework" style="--x:30%;--y:74%;--c:#8fd3c7;--delay:.9s"></span>
+        <span class="reason-firework" style="--x:70%;--y:78%;--c:#b8a7e8;--delay:1.3s"></span>
+        <span class="reason-firework" style="--x:12%;--y:52%;--c:#ffb37d;--delay:1.7s"></span>
+        <span class="reason-firework" style="--x:88%;--y:50%;--c:#ffe6a3;--delay:2.1s"></span>
         <span class="reasons-done-heart">♥</span>
         <p class="done-title">彩蛋</p>
         <p class="done-line">没有理由，就是想一直喜欢你</p>
@@ -3103,7 +3176,7 @@
     '我不说话的时候，你也懂我在想什么。',
     '想把所有好吃的第一口，都留给你。',
     '再普通的日子，和你一起就变得有意思。',
-    '第 22 个理由，是“没有理由，就是想一直喜欢你”。'
+    '第 22个理由，是“没有理由，就是想一直喜欢你”。'
   ];
   const reasonsScene = document.getElementById('reasonsScene');
   const reasonsCover = document.getElementById('reasonsCover');
@@ -3205,10 +3278,10 @@
     if (reasonCurrentBack) reasonCurrentBack.textContent = REASONS[i];
     if (reasonCurrent) {
       reasonCurrent.style.setProperty('--fc', reasonPalette[i % reasonPalette.length]);
-      reasonCurrent.classList.remove('flipped', 'collecting');
+      reasonCurrent.classList.remove('show-reason', 'collecting');
       void reasonCurrent.offsetWidth;
       reasonCurrent.classList.add('dealt');
-      window.setTimeout(() => reasonCurrent.classList.add('flipped'), 300);
+      window.setTimeout(() => reasonCurrent.classList.add('show-reason'), 300);
     }
     if (reasonDeck) reasonDeck.classList.add('disabled');
   }
@@ -3220,7 +3293,7 @@
     if (reasonDeck) reasonDeck.classList.remove('disabled');
     if (currentCleanupTimer) clearTimeout(currentCleanupTimer);
     currentCleanupTimer = window.setTimeout(() => {
-      if (reasonCurrent) reasonCurrent.classList.remove('dealt', 'flipped', 'collecting');
+      if (reasonCurrent) reasonCurrent.classList.remove('dealt', 'show-reason', 'collecting');
     }, 500);
     if (!collectedSet.has(i)) {
       collectedSet.add(i);
