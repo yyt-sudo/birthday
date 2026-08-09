@@ -1156,7 +1156,7 @@
     right: 6px;
     bottom: 4px;
     font-size: 11px;
-    color: rgba(255, 255, 255, .95);
+    color: #ff8fa3;
     text-shadow: 0 1px 3px rgba(0, 0, 0, .25);
     pointer-events: none;
   }
@@ -1403,7 +1403,7 @@
     border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
     background: var(--bc);
     opacity: 0;
-    animation: balloon-rise var(--bd) ease-in var(--delay) forwards;
+    animation: balloon-float var(--bd) ease-in-out var(--delay) infinite alternate;
     pointer-events: none;
   }
   .reason-balloon::after {
@@ -1491,10 +1491,10 @@
   .reason-firework::after {
     transform: translate(-50%, -50%) rotate(-45deg);
   }
-  @keyframes balloon-rise {
-    0% { opacity: 0; transform: translateY(30vh) translateX(0); }
-    15% { opacity: .9; }
-    100% { opacity: .2; transform: translateY(-42vh) translateX(var(--sw, 20px)); }
+  @keyframes balloon-float {
+    0% { opacity: .85; transform: translateY(26vh) translateX(0) rotate(-2deg); }
+    50% { opacity: .95; transform: translateY(-8vh) translateX(var(--sw, 20px)) rotate(3deg); }
+    100% { opacity: .85; transform: translateY(-42vh) translateX(calc(var(--sw, 20px) * -1)) rotate(-3deg); }
   }
   @keyframes firework-burst {
     0%, 100% { opacity: 0; transform: scale(.2); }
