@@ -1059,12 +1059,24 @@
     animation: reason-text-in .55s ease both;
   }
   .reason-current-back::before {
-    content: "♥";
-    display: block;
-    margin-bottom: 6px;
-    color: rgba(255, 255, 255, .85);
-    font-size: 22px;
-    line-height: 1;
+    content: "✦";
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    margin: 0;
+    font-size: 18px;
+    color: rgba(255, 255, 255, .9);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+  }
+  .reason-current-back::after {
+    content: attr(data-num);
+    position: absolute;
+    top: 10px;
+    left: 18px;
+    font-size: clamp(22px, 6vw, 34px);
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, .25);
   }
   .reason-current.show-reason .reason-current-front {
     display: none;
@@ -1075,22 +1087,6 @@
   @keyframes reason-text-in {
     from { opacity: 0; transform: translateY(12px) scale(.96); }
     to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .reason-current-back.number-mode {
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 18px 22px;
-    text-align: left;
-    font-size: clamp(30px, 8vw, 48px);
-  }
-  .reason-current-back.number-mode::before {
-    content: "♥";
-    position: absolute;
-    top: 14px;
-    right: 18px;
-    margin: 0;
-    font-size: 16px;
-    color: rgba(255, 255, 255, .85);
   }
   .reason-board {
     position: absolute;
@@ -1256,7 +1252,7 @@
     box-shadow: 0 30px 70px rgba(0, 0, 0, .45);
   }
   .reason-modal-back::before {
-    content: "♥";
+    content: "✦";
     display: block;
     margin-bottom: 6px;
     color: #e58aa4;
@@ -2155,8 +2151,8 @@
       <p class="gate-error" id="gateError">密码不对哦，再想想</p>
     </div>
   </div>
-  <audio id="bgm" src="Celebrate-Red%20Velvet.mp3?v=4" loop preload="metadata"></audio>
-  <audio id="voiceMsg" src="voice-message.mp3?v=4" preload="auto"></audio>
+  <audio id="bgm" src="Celebrate-Red%20Velvet.mp3?v=4" loop preload="none"></audio>
+  <audio id="voiceMsg" src="voice-message.mp3?v=4" preload="none"></audio>
   <div class="stage scene-greeting" id="stage">
     <button class="music-btn" id="musicBtn" type="button" title="播放音乐" aria-label="播放音乐">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
@@ -3390,22 +3386,14 @@
       currentCleanupTimer = null;
     }
     if (reasonCurrentBack) {
-      reasonCurrentBack.classList.remove('number-mode');
-      void reasonCurrentBack.offsetWidth;
-      reasonCurrentBack.textContent = i + 1;
-      reasonCurrentBack.classList.add('number-mode');
+      reasonCurrentBack.dataset.num = String(i + 1);
+      reasonCurrentBack.textContent = REASONS[i];
     }
     if (reasonCurrent) {
       reasonCurrent.style.setProperty('--fc', reasonPalette[i % reasonPalette.length]);
       reasonCurrent.classList.remove('collecting');
       void reasonCurrent.offsetWidth;
       reasonCurrent.classList.add('dealt');
-      window.setTimeout(() => {
-        if (currentDealt === i && reasonCurrentBack) {
-          reasonCurrentBack.classList.remove('number-mode');
-          reasonCurrentBack.textContent = REASONS[i];
-        }
-      }, 650);
     }
     if (reasonDeck) reasonDeck.classList.add('disabled');
   }
@@ -3419,7 +3407,7 @@
     currentCleanupTimer = window.setTimeout(() => {
       if (reasonCurrent) reasonCurrent.classList.remove('dealt', 'show-reason', 'collecting');
       if (reasonCurrentBack) {
-      reasonCurrentBack.classList.remove('text-swap', 'number-mode');
+      reasonCurrentBack.classList.remove('text-swap');
     }
     if (reasonCurrentBack) reasonCurrentBack.classList.remove('text-swap');
     }, 500);
