@@ -989,6 +989,15 @@
     animation: blink 1s step-end infinite;
     color: #8a4a25;
   }
+  .scene-letter .letter-core {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity .45s ease, visibility .45s ease;
+  }
+  .scene-letter.envelope-open .letter-core {
+    visibility: visible;
+    opacity: 1;
+  }
   .letter-envelope {
     position: absolute;
     top: 0;
@@ -1433,10 +1442,11 @@
     100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1); }
   }
   @keyframes confetti-fall {
-    0% { opacity: 0; transform: translateY(-10vh) rotate(0deg); }
-    8% { opacity: 1; }
-    84% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(116vh) rotate(740deg); }
+    0% { opacity: 0; transform: translateY(-10vh) translateX(0) rotate(0deg); }
+    8% { opacity: .85; }
+    42% { transform: translateY(40vh) translateX(var(--sw, 12px)) rotate(230deg); }
+    84% { opacity: .85; }
+    100% { opacity: 0; transform: translateY(116vh) translateX(calc(var(--sw, 12px) * -1)) rotate(760deg); }
   }
   @keyframes photo-in {
     from { opacity: 0; transform: rotate(35deg) translateY(0) scale(.08); filter: blur(8px); }
@@ -1964,7 +1974,7 @@
     if (wishPrompt) wishPrompt.style.opacity = 0;
     if (wishBurst) wishBurst.classList.add('show');
     wishBurstOpen = true;
-    window.setTimeout(() => launchCakeConfetti(), 550);
+    window.setTimeout(() => launchCakeConfetti(), 1150);
     if (burstParticles && burstParticles.children.length === 0) {
       const colors = ['#ffd98a', '#ff8fa3', '#ffb37d', '#fff0d0', '#ffc3cf', '#ffe6a3'];
       for (let i = 0; i < 56; i++) {
@@ -2036,11 +2046,15 @@
     const box = document.getElementById('cakeConfetti');
     if (!box) return;
     const colors = ['#ffd98a', '#ff8fa3', '#ffb37d', '#fff0d0', '#8fd3c7', '#ffc3cf'];
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 24; i++) {
       const c = document.createElement('i');
       c.style.setProperty('--x', `${Math.random() * 100}%`);
       c.style.setProperty('--d', `${Math.random() * 2}s`);
       c.style.setProperty('--c', colors[i % colors.length]);
+      c.style.setProperty('--sw', `${(Math.random() * 70 - 35).toFixed(1)}px`);
+      c.style.width = `${7 + Math.random() * 4}px`;
+      c.style.height = `${10 + Math.random() * 6}px`;
+      c.style.borderRadius = `${1 + Math.random() * 3}px`;
       box.appendChild(c);
       c.addEventListener('animationend', () => c.remove(), { once: true });
     }
@@ -2466,6 +2480,8 @@
   function resetLetterEnvelope() {
     const env = document.getElementById('letterEnvelope');
     if (env) env.classList.remove('open');
+    const letterSceneEl = document.getElementById('letterScene');
+    if (letterSceneEl) letterSceneEl.classList.remove('envelope-open');
     letterOpened = false;
     if (letterTimer) clearTimeout(letterTimer);
     letterTimer = null;
@@ -2476,6 +2492,8 @@
     letterOpened = true;
     const env = document.getElementById('letterEnvelope');
     if (env) env.classList.add('open');
+    const letterSceneEl = document.getElementById('letterScene');
+    if (letterSceneEl) letterSceneEl.classList.add('envelope-open');
     window.setTimeout(() => startLetterTyping(), 650);
   }
 
