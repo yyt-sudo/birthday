@@ -2852,7 +2852,7 @@
     const box = document.getElementById('cakeVortex');
     if (!box) return;
     const colors = ['#ffd98a', '#ffc3cf', '#ffe6a3', '#ffb37d'];
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < 16; i++) {
       const s = document.createElement('span');
       s.className = 'vortex-star';
       const a = (i / 26) * 360;
@@ -2924,10 +2924,10 @@
     const parts = [];
     const mobile = window.innerWidth < 760;
     const s = mobile ? 0.55 : 1;
-    fillCylinder(parts, 150, -70, 30, [[255, 201, 218], [246, 173, 198], [224, 127, 159]], Math.round(900 * s));
-    fillCylinder(parts, 112, 30, 110, [[255, 236, 196], [242, 205, 143], [220, 171, 99]], Math.round(720 * s));
-    fillCylinder(parts, 74, 110, 182, [[255, 214, 228], [243, 169, 196], [222, 125, 164]], Math.round(520 * s));
-    for (let i = 0; i < Math.round(320 * s); i++) {
+    fillCylinder(parts, 150, -70, 30, [[255, 201, 218], [246, 173, 198], [224, 127, 159]], Math.round(300 * s));
+    fillCylinder(parts, 112, 30, 110, [[255, 236, 196], [242, 205, 143], [220, 171, 99]], Math.round(240 * s));
+    fillCylinder(parts, 74, 110, 182, [[255, 214, 228], [243, 169, 196], [222, 125, 164]], Math.round(180 * s));
+    for (let i = 0; i < Math.round(120 * s); i++) {
       const a = Math.random() * Math.PI * 2;
       const rr = Math.sqrt(Math.random()) * 190;
       parts.push({
@@ -3242,7 +3242,6 @@
     });
   }
   renderPhotos(photoPage1, PHOTOS.slice(0, 8), 0);
-  renderPhotos(photoPage2, PHOTOS.slice(8), 8);
 
   function applyPhotoPage(next) {
     photoPage = next;
@@ -3256,6 +3255,9 @@
     ).join('');
   }
   function showPhotoPage(next) {
+    if (next === 1 && photoPage2.children.length === 0) {
+      renderPhotos(photoPage2, PHOTOS.slice(8), 8);
+    }
     const page = next === 1 ? photoPage2 : photoPage1;
     page.querySelectorAll('img').forEach((img) => { img.loading = 'eager'; });
     preloadThumbs(next);
