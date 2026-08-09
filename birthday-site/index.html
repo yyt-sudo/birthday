@@ -1055,9 +1055,9 @@
   }
   .reason-current-back {
     background:
-      radial-gradient(circle at 28% 18%, rgba(255, 255, 255, .85), transparent 46%),
-      linear-gradient(160deg, #fffaf4, #ffe9ef 60%, #ffdbe2);
-    color: #8a3f58;
+      radial-gradient(circle at 28% 18%, rgba(255, 255, 255, .28), transparent 46%),
+      var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
+    color: #fff;
     font-size: clamp(17px, 4.4vw, 24px);
     font-weight: 600;
     line-height: 1.8;
@@ -1067,7 +1067,7 @@
     content: "♥";
     display: block;
     margin-bottom: 6px;
-    color: #e58aa4;
+    color: rgba(255, 255, 255, .85);
     font-size: 22px;
     line-height: 1;
   }
@@ -1341,9 +1341,15 @@
     line-height: 1;
     color: #ff7c9c;
     text-shadow: 0 0 40px rgba(255, 124, 156, .9), 0 0 100px rgba(255, 160, 185, .5);
-    animation: heart-beat 1s ease-in-out infinite;
+    animation: reason-heart-beat 1s ease-in-out infinite;
     pointer-events: none;
     z-index: 2;
+  }
+  @keyframes reason-heart-beat {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    25% { transform: translate(-50%, -50%) scale(1.14); }
+    40% { transform: translate(-50%, -50%) scale(1); }
+    60% { transform: translate(-50%, -50%) scale(1.1); }
   }
   @keyframes reason-flash {
     0% { opacity: 1; }
@@ -1359,6 +1365,7 @@
   }
   .reason-balloon {
     position: absolute;
+    z-index: 3;
     width: 34px;
     height: 44px;
     border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
@@ -1379,6 +1386,7 @@
   }
   .reason-firework {
     position: absolute;
+    z-index: 3;
     left: var(--x);
     top: var(--y);
     width: 8px;
@@ -1621,6 +1629,13 @@
   }
   .letter-envelope.open .envelope-seal {
     animation: envelope-seal-pop .5s ease forwards;
+  }
+  .envelope-top-line::before,
+  .envelope-top-line::after {
+    content: "♥";
+    margin: 0 8px;
+    font-size: .8em;
+    opacity: .75;
   }
   .envelope-top-line {
     position: absolute;
@@ -2409,7 +2424,7 @@
         <span class="envelope-card">
           <span class="envelope-back"></span>
           <span class="envelope-flap"></span>
-          <span class="envelope-top-line">致 小周</span>
+          <span class="envelope-top-line">致 亲爱的小周</span>
           <span class="envelope-seal">♥</span>
           <span class="envelope-copy">打开它，听我说</span>
         </span>
