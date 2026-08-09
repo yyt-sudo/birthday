@@ -1074,37 +1074,41 @@
     position: absolute;
     inset: 0;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: repeat(5, auto);
+    align-content: start;
     gap: 8px;
     padding: 74px 18px 90px;
     z-index: 1;
-    pointer-events: none;
-    overflow: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .reason-board::-webkit-scrollbar {
+    display: none;
   }
   @media (min-width: 761px) {
     .reason-board {
-      grid-template-columns: repeat(6, 1fr);
-      grid-template-rows: repeat(4, 1fr);
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-rows: repeat(4, auto);
     }
   }
   .reason-back-card {
     position: relative;
     width: 100%;
     aspect-ratio: 3 / 4;
-    border: 1px solid rgba(255, 215, 150, .35);
-    border-radius: 12px;
-    background:
-      radial-gradient(circle at 30% 20%, rgba(255, 255, 255, .5), transparent 45%),
-      linear-gradient(160deg, rgba(255, 248, 240, .28), rgba(255, 220, 230, .2));
-    color: rgba(255, 230, 180, .55);
+    border: 1px solid rgba(255, 255, 255, .5);
+    border-radius: 10px;
+    background: var(--fc, linear-gradient(155deg, #ff9db4, #d94f72));
+    color: #fff;
     font-size: clamp(13px, 3.4vw, 18px);
     font-weight: 800;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: .45;
-    filter: saturate(.5) brightness(1.1);
+    opacity: .72;
+    filter: saturate(.8) brightness(.96);
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .22);
     animation: back-card-in .45s ease;
   }
   @keyframes deal-pop {
@@ -3180,9 +3184,16 @@
       collectedCount += 1;
       updateReasonProgress();
       if (reasonBoard) {
-        const card = document.createElement('span');
+        const card = document.createElement('button');
         card.className = 'reason-back-card';
+        card.type = 'button';
+        card.dataset.index = String(i);
+        card.style.setProperty('--fc', reasonPalette[i % reasonPalette.length]);
         card.textContent = i + 1;
+        card.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openReasonModal(Number(card.dataset.index));
+        });
         reasonBoard.appendChild(card);
         spawnReasonBurst(card);
       }
