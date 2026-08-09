@@ -967,6 +967,109 @@
     animation: blink 1s step-end infinite;
     color: #8a4a25;
   }
+  .letter-envelope {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    background:
+      linear-gradient(180deg, rgba(255, 238, 210, .97), rgba(255, 224, 182, .97)),
+      radial-gradient(circle at 50% 42%, rgba(255, 220, 170, .9), transparent 62%);
+    cursor: pointer;
+  }
+  .letter-envelope.open {
+    pointer-events: none;
+    animation: envelope-fade .55s ease .42s forwards;
+  }
+  .envelope-card {
+    position: relative;
+    width: min(82vw, 520px);
+    aspect-ratio: 5 / 3.4;
+    background: linear-gradient(180deg, #fff8ec, #f3dfc3);
+    border-radius: 10px;
+    box-shadow: 0 30px 70px rgba(60, 25, 15, .35), 0 0 0 1px rgba(120, 70, 30, .18);
+    overflow: hidden;
+  }
+  .envelope-back {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(135deg, rgba(210, 140, 90, .08), transparent 45%),
+      linear-gradient(315deg, rgba(210, 140, 90, .08), transparent 45%);
+  }
+  .envelope-flap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 46%;
+    background: linear-gradient(180deg, #f7e6cd, #ecd2ae);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    z-index: 3;
+  }
+  .letter-envelope.open .envelope-flap {
+    animation: envelope-flap-open .5s ease forwards;
+  }
+  .letter-envelope.open .envelope-seal {
+    animation: envelope-seal-pop .5s ease forwards;
+  }
+  .envelope-top-line {
+    position: absolute;
+    left: 50%;
+    top: 17%;
+    transform: translateX(-50%);
+    color: rgba(138, 74, 37, .75);
+    font-size: clamp(14px, 3vw, 18px);
+    letter-spacing: .3em;
+    white-space: nowrap;
+    z-index: 4;
+  }
+  .envelope-seal {
+    position: absolute;
+    left: 50%;
+    top: 38%;
+    transform: translate(-50%, -50%);
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #e35d6e, #b2264a 72%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .25);
+    z-index: 4;
+  }
+  .envelope-copy {
+    position: absolute;
+    left: 50%;
+    bottom: 13%;
+    transform: translateX(-50%);
+    color: #8a4a25;
+    font-size: clamp(18px, 4vw, 26px);
+    font-weight: 700;
+    letter-spacing: .12em;
+    white-space: nowrap;
+    z-index: 4;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .6);
+  }
+  @keyframes envelope-flap-open {
+    to { transform: rotateX(150deg); }
+  }
+  @keyframes envelope-seal-pop {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(2.2); }
+  }
+  @keyframes envelope-fade {
+    0% { opacity: 1; visibility: visible; }
+    100% { opacity: 0; visibility: hidden; }
+  }
   .voice-btn {
     display: inline-flex;
     align-items: center;
@@ -1679,6 +1782,15 @@
 
     <section class="scene scene-letter" id="letterScene">
       <div class="floating-hearts" id="letterHearts" aria-hidden="true"></div>
+      <button class="letter-envelope" id="letterEnvelope" type="button" aria-label="打开信封">
+        <span class="envelope-card">
+          <span class="envelope-back"></span>
+          <span class="envelope-flap"></span>
+          <span class="envelope-top-line">致 小周</span>
+          <span class="envelope-seal">♥</span>
+          <span class="envelope-copy">打开它，听我说</span>
+        </span>
+      </button>
       <div class="letter-core">
         <span class="letter-seal" aria-hidden="true">♥</span>
         <h2 class="letter-title">亲爱的宝贝，生日快乐。</h2>
@@ -2225,6 +2337,7 @@
   let letterTimer = null;
   let letterFast = false;
   let letterDone = false;
+  let letterOpened = false;
   function startLetterTyping() {
     if (letterTimer) clearTimeout(letterTimer);
     letterFast = false;
@@ -2260,6 +2373,21 @@
   }
   function speedUpLetterTyping() {
     letterFast = true;
+  }
+  function resetLetterEnvelope() {
+    const env = document.getElementById('letterEnvelope');
+    if (env) env.classList.remove('open');
+    letterOpened = false;
+    if (letterTimer) clearTimeout(letterTimer);
+    letterTimer = null;
+    letterDone = false;
+  }
+  function openLetterEnvelope() {
+    if (letterOpened) return;
+    letterOpened = true;
+    const env = document.getElementById('letterEnvelope');
+    if (env) env.classList.add('open');
+    window.setTimeout(() => startLetterTyping(), 650);
   }
 
   const rotations = [-3.2, 2.4, -1.6, 3, -2.1, 1.8, -3, 2.6, -2.4, 1.9, -2, 1.5, -2.8, 3.2, -1.4];
@@ -2325,6 +2453,7 @@
       if (cakeSvg) cakeSvg.classList.remove('blown');
       if (cakeScene) cakeScene.classList.remove('bursting', 'wished');
       resetWishGlow();
+      resetLetterEnvelope();
       if (wishPrompt) wishPrompt.style.opacity = '';
       if (wishBurst) wishBurst.classList.remove('show');
     } else if (next === 1) {
@@ -2335,7 +2464,7 @@
       hintText.textContent = '轻触屏幕';
     }
     if (scene === 2) {
-      startLetterTyping();
+      resetLetterEnvelope();
       preloadThumbs(1);
       if (voiceMsg) voiceMsg.load();
     }
@@ -2488,6 +2617,14 @@
     voiceLabel.textContent = '再听一遍';
     resumeBgmIfNeeded();
   });
+  const letterEnvelope = document.getElementById('letterEnvelope');
+  if (letterEnvelope) {
+    letterEnvelope.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openLetterEnvelope();
+    });
+  }
+
   endingHeart.addEventListener('click', (e) => {
     e.stopPropagation();
     heartClickCount += 1;
@@ -2561,7 +2698,8 @@
       else if (!wishBurstOpen) setScene(2);
     }
     else if (scene === 2) {
-      if (!letterDone) speedUpLetterTyping();
+      if (!letterOpened) openLetterEnvelope();
+      else if (!letterDone) speedUpLetterTyping();
       else setScene(3);
     }
     else if (scene === 3 && photoPage === 0) showPhotoPage(1);
@@ -2586,7 +2724,8 @@
         else if (!wishBurstOpen) setScene(2);
       }
       else if (scene === 2) {
-        if (!letterDone) speedUpLetterTyping();
+        if (!letterOpened) openLetterEnvelope();
+        else if (!letterDone) speedUpLetterTyping();
         else setScene(3);
       }
       else if (scene === 3 && photoPage === 0) showPhotoPage(1);
