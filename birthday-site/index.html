@@ -3241,10 +3241,10 @@
     const env = document.getElementById('letterEnvelope');
     if (env) env.classList.add('open');
     const letterSceneEl = document.getElementById('letterScene');
-    if (letterSceneEl) {
-      window.setTimeout(() => letterSceneEl.classList.add('envelope-open'), 700);
-    }
-    window.setTimeout(() => startLetterTyping(), 1000);
+    window.setTimeout(() => {
+      if (letterSceneEl) letterSceneEl.classList.add('envelope-open');
+      startLetterTyping();
+    }, 700);
   }
 
   const rotations = [-3.2, 2.4, -1.6, 3, -2.1, 1.8, -3, 2.6, -2.4, 1.9, -2, 1.5, -2.8, 3.2, -1.4];
