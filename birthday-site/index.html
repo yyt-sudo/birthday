@@ -1401,19 +1401,32 @@
     width: 34px;
     height: 44px;
     border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
-    background: var(--bc);
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255, 255, 255, .55), transparent 45%),
+      var(--bc);
     opacity: 0;
-    animation: balloon-float var(--bd) ease-in-out var(--delay) infinite alternate;
+    animation: balloon-rise var(--bd) ease-in-out var(--delay) infinite;
     pointer-events: none;
+  }
+  .reason-balloon::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -15px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50% 50% 50% 0;
+    background: var(--bc);
+    transform: translateX(-50%) rotate(-45deg);
   }
   .reason-balloon::after {
     content: "";
     position: absolute;
     left: 50%;
-    bottom: -12px;
+    bottom: -22px;
     width: 2px;
-    height: 14px;
-    background: rgba(255, 255, 255, .45);
+    height: 12px;
+    background: rgba(255, 255, 255, .4);
     transform: translateX(-50%);
   }
   .reason-firework {
@@ -1491,10 +1504,11 @@
   .reason-firework::after {
     transform: translate(-50%, -50%) rotate(-45deg);
   }
-  @keyframes balloon-float {
-    0% { opacity: .85; transform: translateY(26vh) translateX(0) rotate(-2deg); }
-    50% { opacity: .95; transform: translateY(-8vh) translateX(var(--sw, 20px)) rotate(3deg); }
-    100% { opacity: .85; transform: translateY(-42vh) translateX(calc(var(--sw, 20px) * -1)) rotate(-3deg); }
+  @keyframes balloon-rise {
+    0% { opacity: 0; transform: translateY(110vh) translateX(0) rotate(-2deg); }
+    12% { opacity: .9; }
+    88% { opacity: .9; }
+    100% { opacity: 0; transform: translateY(-30vh) translateX(var(--sw, 20px)) rotate(3deg); }
   }
   @keyframes firework-burst {
     0%, 100% { opacity: 0; transform: scale(.2); }
@@ -3227,8 +3241,10 @@
     const env = document.getElementById('letterEnvelope');
     if (env) env.classList.add('open');
     const letterSceneEl = document.getElementById('letterScene');
-    if (letterSceneEl) letterSceneEl.classList.add('envelope-open');
-    window.setTimeout(() => startLetterTyping(), 650);
+    if (letterSceneEl) {
+      window.setTimeout(() => letterSceneEl.classList.add('envelope-open'), 700);
+    }
+    window.setTimeout(() => startLetterTyping(), 1000);
   }
 
   const rotations = [-3.2, 2.4, -1.6, 3, -2.1, 1.8, -3, 2.6, -2.4, 1.9, -2, 1.5, -2.8, 3.2, -1.4];
