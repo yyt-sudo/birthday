@@ -2169,7 +2169,7 @@
       <p class="gate-error" id="gateError">密码不对哦，再想想</p>
     </div>
   </div>
-  <audio id="bgm" src="Celebrate-Red%20Velvet.mp3?v=4" loop preload="none"></audio>
+  <audio id="bgm" src="Celebrate-Red%20Velvet.mp3?v=4" loop preload="metadata"></audio>
   <audio id="voiceMsg" src="voice-message.mp3?v=4" preload="none"></audio>
   <div class="stage scene-greeting" id="stage">
     <button class="music-btn" id="musicBtn" type="button" title="播放音乐" aria-label="播放音乐">
@@ -3268,7 +3268,7 @@
       <button class="photo" type="button" data-index="${baseIndex + i}" data-full="${full(n)}"
         style="--i:${i};--r:${rotations[i]}deg;--t:${shifts[i]}px"
         aria-label="照片 ${n}">
-        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="eager"></span>
+        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="lazy"></span>
       </button>`).join('');
     container.querySelectorAll('img').forEach((img) => {
       const mark = () => img.classList.add('loaded');
@@ -3279,6 +3279,8 @@
       }
     });
   }
+  renderPhotos(photoPage1, PHOTOS.slice(0, 8), 0);
+  renderPhotos(photoPage2, PHOTOS.slice(8), 8);
 
   function applyPhotoPage(next) {
     photoPage = next;
@@ -3292,9 +3294,6 @@
     ).join('');
   }
   function showPhotoPage(next) {
-    if (next === 1 && photoPage2.children.length === 0) {
-      renderPhotos(photoPage2, PHOTOS.slice(8), 8);
-    }
     const page = next === 1 ? photoPage2 : photoPage1;
     page.querySelectorAll('img').forEach((img) => { img.loading = 'eager'; });
     preloadThumbs(next);
@@ -3599,8 +3598,6 @@
     if (scene === 3) {
       preloadThumbs(0);
       preloadThumbs(1);
-      if (photoPage1.children.length === 0) renderPhotos(photoPage1, PHOTOS.slice(0, 8), 0);
-      if (photoPage2.children.length === 0) renderPhotos(photoPage2, PHOTOS.slice(8), 8);
       showPhotoPage(0);
     }
     if (scene === 4) {
