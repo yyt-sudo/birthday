@@ -3268,7 +3268,7 @@
       <button class="photo" type="button" data-index="${baseIndex + i}" data-full="${full(n)}"
         style="--i:${i};--r:${rotations[i]}deg;--t:${shifts[i]}px"
         aria-label="照片 ${n}">
-        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="lazy"></span>
+        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="${baseIndex >= 8 ? 'eager' : 'lazy'}"></span>
       </button>`).join('');
     container.querySelectorAll('img').forEach((img) => {
       const mark = () => img.classList.add('loaded');
