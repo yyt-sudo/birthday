@@ -527,6 +527,67 @@
     50% { transform: translateY(-22px) translateX(var(--sw)) scale(1); }
     82% { opacity: var(--o); }
   }
+  .music-bars {
+    position: absolute;
+    left: 76px;
+    top: 30px;
+    z-index: 31;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 16px;
+    opacity: .35;
+    pointer-events: none;
+    transition: opacity .4s ease;
+  }
+  .music-bars span {
+    width: 4px;
+    height: 14px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #ffd98a, #ff8fa3);
+    transform-origin: bottom;
+    animation: music-bar .9s ease-in-out infinite;
+    animation-play-state: paused;
+  }
+  .music-bars span:nth-child(2) { animation-delay: .15s; }
+  .music-bars span:nth-child(3) { animation-delay: .3s; }
+  .music-bars span:nth-child(4) { animation-delay: .45s; }
+  .music-btn.playing + .music-bars { opacity: 1; }
+  .music-btn.playing + .music-bars span { animation-play-state: running; }
+  @keyframes music-bar {
+    0%, 100% { transform: scaleY(.35); }
+    50% { transform: scaleY(1); }
+  }
+  .chapter-nav {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 32;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px;
+    max-width: 94vw;
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 215, 150, .25);
+    border-radius: 999px;
+    background: rgba(16, 7, 12, .55);
+    pointer-events: none;
+  }
+  .chapter-nav .chapter-item {
+    padding: 3px 7px;
+    border-radius: 999px;
+    color: rgba(255, 230, 180, .55);
+    font-size: 11px;
+    letter-spacing: .06em;
+    white-space: nowrap;
+    transition: color .3s ease, background .3s ease;
+  }
+  .chapter-nav .chapter-item.active {
+    color: #ffe6a3;
+    background: rgba(255, 215, 150, .18);
+  }
   .scene-greeting {
     background:
       linear-gradient(180deg, rgba(255, 214, 150, .07), transparent 46%),
@@ -2175,8 +2236,18 @@
     <button class="music-btn" id="musicBtn" type="button" title="播放音乐" aria-label="播放音乐">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
     </button>
+    <div class="music-bars" id="musicBars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <nav class="chapter-nav" id="chapterNav" aria-label="章节进度">
+      <span class="chapter-item" data-scene="0">开始</span>
+      <span class="chapter-item" data-scene="1">许愿</span>
+      <span class="chapter-item" data-scene="2">拆信</span>
+      <span class="chapter-item" data-scene="3">回忆</span>
+      <span class="chapter-item" data-scene="4">理由</span>
+      <span class="chapter-item" data-scene="5">未来</span>
+    </nav>
 
-    <div class="ambient-particles" id="ambientParticles" aria-hidden="true"></div>
+    <div class="ambient-particles"
+ id="ambientParticles" aria-hidden="true"></div>
     <section class="scene scene-greeting" id="greetingScene">
       <div class="greeting-core">
         <h1 class="title" aria-label="生日快乐">
@@ -3567,6 +3638,9 @@
     stage.classList.remove(...sceneNames.map((n) => 'scene-' + n));
     stage.classList.add('scene-' + sceneNames[scene]);
     hintText.classList.remove('show');
+    document.querySelectorAll('#chapterNav .chapter-item').forEach((el) => {
+      el.classList.toggle('active', Number(el.dataset.scene) === next);
+    });
     if (next === 0) {
       hintText.textContent = '开启礼物';
       candlesBlown = false;
