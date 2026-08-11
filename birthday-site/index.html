@@ -527,37 +527,6 @@
     50% { transform: translateY(-22px) translateX(var(--sw)) scale(1); }
     82% { opacity: var(--o); }
   }
-  .music-bars {
-    position: absolute;
-    left: 76px;
-    top: 30px;
-    z-index: 31;
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 16px;
-    opacity: .35;
-    pointer-events: none;
-    transition: opacity .4s ease;
-  }
-  .music-bars span {
-    width: 4px;
-    height: 14px;
-    border-radius: 2px;
-    background: linear-gradient(180deg, #ffd98a, #ff8fa3);
-    transform-origin: bottom;
-    animation: music-bar .9s ease-in-out infinite;
-    animation-play-state: paused;
-  }
-  .music-bars span:nth-child(2) { animation-delay: .15s; }
-  .music-bars span:nth-child(3) { animation-delay: .3s; }
-  .music-bars span:nth-child(4) { animation-delay: .45s; }
-  .music-btn.playing + .music-bars { opacity: 1; }
-  .music-btn.playing + .music-bars span { animation-play-state: running; }
-  @keyframes music-bar {
-    0%, 100% { transform: scaleY(.35); }
-    50% { transform: scaleY(1); }
-  }
   .scene-greeting {
     background:
       linear-gradient(180deg, rgba(255, 214, 150, .07), transparent 46%),
@@ -2206,7 +2175,6 @@
     <button class="music-btn" id="musicBtn" type="button" title="播放音乐" aria-label="播放音乐">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
     </button>
-    <div class="music-bars" id="musicBars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 
     <div class="ambient-particles"
  id="ambientParticles" aria-hidden="true"></div>
@@ -3300,7 +3268,7 @@
       <button class="photo" type="button" data-index="${baseIndex + i}" data-full="${full(n)}"
         style="--i:${i};--r:${rotations[i]}deg;--t:${shifts[i]}px"
         aria-label="照片 ${n}">
-        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="${baseIndex >= 8 ? 'eager' : 'lazy'}"></span>
+        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="eager"></span>
       </button>`).join('');
     container.querySelectorAll('img').forEach((img) => {
       const mark = () => img.classList.add('loaded');
