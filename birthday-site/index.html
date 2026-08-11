@@ -3279,7 +3279,6 @@
       }
     });
   }
-  renderPhotos(photoPage1, PHOTOS.slice(0, 8), 0);
 
   function applyPhotoPage(next) {
     photoPage = next;
@@ -3588,14 +3587,19 @@
     } else {
       hintText.textContent = '轻触屏幕';
     }
+    if (scene === 1) {
+      preloadThumbs(0);
+    }
     if (scene === 2) {
       resetLetterEnvelope();
+      preloadThumbs(0);
       preloadThumbs(1);
       if (voiceMsg) voiceMsg.load();
     }
     if (scene === 3) {
       preloadThumbs(0);
       preloadThumbs(1);
+      if (photoPage1.children.length === 0) renderPhotos(photoPage1, PHOTOS.slice(0, 8), 0);
       if (photoPage2.children.length === 0) renderPhotos(photoPage2, PHOTOS.slice(8), 8);
       showPhotoPage(0);
     }
