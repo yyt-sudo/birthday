@@ -136,6 +136,31 @@
     transform: none;
     pointer-events: auto;
   }
+  .scene *,
+  .scene *::before,
+  .scene *::after {
+    animation-play-state: paused !important;
+  }
+  .stage.scene-cake .scene-cake *,
+  .stage.scene-cake .scene-cake *::before,
+  .stage.scene-cake .scene-cake *::after,
+  .stage.scene-greeting .scene-greeting *,
+  .stage.scene-greeting .scene-greeting *::before,
+  .stage.scene-greeting .scene-greeting *::after,
+  .stage.scene-photos .scene-photos *,
+  .stage.scene-photos .scene-photos *::before,
+  .stage.scene-photos .scene-photos *::after,
+  .stage.scene-letter .scene-letter *,
+  .stage.scene-letter .scene-letter *::before,
+  .stage.scene-letter .scene-letter *::after,
+  .stage.scene-reasons .scene-reasons *,
+  .stage.scene-reasons .scene-reasons *::before,
+  .stage.scene-reasons .scene-reasons *::after,
+  .stage.scene-ending .scene-ending *,
+  .stage.scene-ending .scene-ending *::before,
+  .stage.scene-ending .scene-ending *::after {
+    animation-play-state: running !important;
+  }
 
   /* ---------- 蛋糕 ---------- */
   .scene-cake {
@@ -2671,19 +2696,50 @@
   const musicBtn = document.getElementById('musicBtn');
   let musicStarted = false;
   let bgmUserPaused = false;
+  let bgmBlobUrl = null;
+  let bgmBlobLoading = false;
+  let bgmBlobReady = false;
   bgm.addEventListener('error', () => {
     musicStarted = false;
     musicBtn.classList.remove('playing');
   });
   const preheatAudio = () => {
-    bgm.preload = 'auto';
+    bgm.preload = 'metadata';
     voiceMsg.preload = 'auto';
+    if (!bgmBlobReady && !bgmBlobLoading) {
+      bgmBlobLoading = true;
+      fetch(`Celebrate-Red%20Velvet.mp3?v=${ASSET_VERSION}`)
+        .then((r) => {
+          if (!r.ok) throw new Error('bgm fetch failed');
+          return r.blob();
+        })
+        .then((blob) => {
+          bgmBlobUrl = URL.createObjectURL(blob);
+          bgmBlobReady = true;
+          if (bgm.paused && !bgmUserPaused) {
+            const t = bgm.currentTime;
+            bgm.src = bgmBlobUrl;
+            bgm.load();
+            bgm.currentTime = t;
+            if (musicBtn.classList.contains('playing')) bgm.play().catch(() => {});
+          }
+        })
+        .catch(() => {
+          bgmBlobLoading = false;
+        });
+    }
     bgm.load();
     voiceMsg.load();
   };
   document.addEventListener('pointerdown', preheatAudio, { once: true });
   document.addEventListener('touchstart', preheatAudio, { once: true });
   const resumeBgmIfReady = () => {
+    if (bgmBlobReady && bgmBlobUrl && bgm.src !== bgmBlobUrl && bgm.paused && !bgmUserPaused && musicBtn.classList.contains('playing')) {
+      const t = bgm.currentTime;
+      bgm.src = bgmBlobUrl;
+      bgm.load();
+      bgm.currentTime = t;
+    }
     if (bgmUserPaused || !musicBtn.classList.contains('playing') || !bgm.paused) return;
     if (bgm.readyState < 3) return;
     if (voiceMsg && !voiceMsg.paused) return;
@@ -2837,8 +2893,8 @@
   const PHOTOS = [0, 1, '1.5', 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
   const ASSET_VERSION = '5';
   const thumb = (n) => `thumbs/${n}.jpg?v=${ASSET_VERSION}`;
-  const full = (n) => `view/${n}.jpg?v=${ASSET_VERSION}`;
-  const lightboxSrc = (n) => (window.matchMedia('(max-width: 760px)').matches ? `mobile/${n}.jpg?v=${ASSET_VERSION}` : full(n));
+  const full = (n) => `mobile/${n}.jpg?v=${ASSET_VERSION}`;
+  const lightboxSrc = (n) => `mobile/${n}.jpg?v=${ASSET_VERSION}`;
   let thumbPreloads = [[], []];
   function preloadThumbs(page = 0) {
     const start = page * 8;
@@ -3634,7 +3690,7 @@
   const lightboxImg = document.getElementById('lightboxImg');
   let lightboxIndex = 0;
   function loadLightboxPhoto(i, step) {
-    const paths = [lightboxSrc(i), full(i), thumb(i)];
+    const paths = [thumb(i), lightboxSrc(i)];
     lightboxImg.onload = () => {
       lightboxImg.onerror = null;
       lightbox.classList.remove('loading');
