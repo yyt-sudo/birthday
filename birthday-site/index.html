@@ -2670,6 +2670,7 @@
   const bgm = document.getElementById('bgm');
   const musicBtn = document.getElementById('musicBtn');
   let musicStarted = false;
+  let bgmUserPaused = false;
   bgm.addEventListener('error', () => {
     musicStarted = false;
     musicBtn.classList.remove('playing');
@@ -2682,9 +2683,23 @@
   };
   document.addEventListener('pointerdown', preheatAudio, { once: true });
   document.addEventListener('touchstart', preheatAudio, { once: true });
+  const resumeBgmIfReady = () => {
+    if (bgmUserPaused || !musicBtn.classList.contains('playing') || !bgm.paused) return;
+    if (bgm.readyState < 3) return;
+    if (voiceMsg && !voiceMsg.paused) return;
+    bgm.play().catch(() => {});
+  };
+  bgm.addEventListener('canplay', resumeBgmIfReady);
+  bgm.addEventListener('pause', () => {
+    if (!bgmUserPaused && musicBtn.classList.contains('playing')) {
+      window.setTimeout(resumeBgmIfReady, 250);
+    }
+  });
+  window.setInterval(resumeBgmIfReady, 2000);
   function startMusic() {
     if (musicStarted || !bgm) return;
     musicStarted = true;
+    bgmUserPaused = false;
     const tryPlay = () => {
       const p = bgm.play();
       if (p) {
@@ -3602,6 +3617,7 @@
     }
     if (scene === 3) {
       showPhotoPage(0);
+      window.setTimeout(() => preloadThumbs(1), 350);
     }
     if (scene === 4) {
       resetReasons();
@@ -3807,6 +3823,7 @@
   musicBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     if (bgm.paused) {
+      bgmUserPaused = false;
       if (musicStarted) {
         bgm.play().catch(() => {});
         musicBtn.classList.add('playing');
@@ -3814,6 +3831,7 @@
         startMusic();
       }
     } else {
+      bgmUserPaused = true;
       bgm.pause();
       musicBtn.classList.remove('playing');
     }
