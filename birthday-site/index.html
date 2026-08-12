@@ -2809,7 +2809,7 @@
       c.addEventListener('animationend', () => c.remove(), { once: true });
     }
   }
-  const PHOTOS = Array.from({ length: 17 }, (_, i) => i + 1);
+  const PHOTOS = [0, 1, '1.5', 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
   const ASSET_VERSION = '4';
   const thumb = (n) => `thumbs/${n}.jpg?v=${ASSET_VERSION}`;
   const full = (n) => `view/${n}.jpg?v=${ASSET_VERSION}`;
