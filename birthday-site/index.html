@@ -1337,6 +1337,14 @@
     opacity: 1;
     visibility: visible;
   }
+  .reasons-done:not(.show) .reasons-done-float,
+  .reasons-done:not(.show) .reason-balloon,
+  .reasons-done:not(.show) .reason-firework,
+  .reasons-done:not(.show) .reason-ring,
+  .reasons-done:not(.show) .reason-flash,
+  .reasons-done:not(.show) .reason-done-heart {
+    animation-play-state: paused;
+  }
   .reason-ring {
     position: absolute;
     left: 50%;
@@ -2667,6 +2675,8 @@
     musicBtn.classList.remove('playing');
   });
   const preheatAudio = () => {
+    bgm.preload = 'auto';
+    voiceMsg.preload = 'auto';
     bgm.load();
     voiceMsg.load();
   };
@@ -2810,7 +2820,7 @@
     }
   }
   const PHOTOS = [0, 1, '1.5', 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-  const ASSET_VERSION = '4';
+  const ASSET_VERSION = '5';
   const thumb = (n) => `thumbs/${n}.jpg?v=${ASSET_VERSION}`;
   const full = (n) => `view/${n}.jpg?v=${ASSET_VERSION}`;
   const lightboxSrc = (n) => (window.matchMedia('(max-width: 760px)').matches ? `mobile/${n}.jpg?v=${ASSET_VERSION}` : full(n));
@@ -3270,7 +3280,7 @@
       <button class="photo" type="button" data-index="${baseIndex + i}" data-full="${full(n)}"
         style="--i:${i};--r:${rotations[i]}deg;--t:${shifts[i]}px"
         aria-label="照片 ${n}">
-        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="${baseIndex >= 8 ? 'eager' : 'lazy'}"></span>
+        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="lazy"></span>
       </button>`).join('');
     container.querySelectorAll('img').forEach((img) => {
       const mark = () => img.classList.add('loaded');
@@ -3301,8 +3311,6 @@
     preloadThumbs(next);
     applyPhotoPage(next);
   }
-  showPhotoPage(0);
-
   const REASONS = [
     '你的笑容，是我一天里最想看见的风景。',
     '再平常的话，你也愿意认真听完。',
@@ -3588,18 +3596,11 @@
     } else {
       hintText.textContent = '轻触屏幕';
     }
-    if (scene === 1) {
-      preloadThumbs(0);
-    }
     if (scene === 2) {
       resetLetterEnvelope();
-      preloadThumbs(0);
-      preloadThumbs(1);
       if (voiceMsg) voiceMsg.load();
     }
     if (scene === 3) {
-      preloadThumbs(0);
-      preloadThumbs(1);
       showPhotoPage(0);
     }
     if (scene === 4) {
