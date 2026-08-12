@@ -2696,54 +2696,24 @@
   const musicBtn = document.getElementById('musicBtn');
   let musicStarted = false;
   let bgmUserPaused = false;
-  let bgmBlobUrl = null;
-  let bgmBlobLoading = false;
-  let bgmBlobReady = false;
   bgm.addEventListener('error', () => {
     musicStarted = false;
     musicBtn.classList.remove('playing');
   });
   const preheatAudio = () => {
-    bgm.preload = 'metadata';
+    bgm.preload = 'auto';
     voiceMsg.preload = 'auto';
-    if (!bgmBlobReady && !bgmBlobLoading) {
-      bgmBlobLoading = true;
-      fetch(`Celebrate-Red%20Velvet.mp3?v=${ASSET_VERSION}`)
-        .then((r) => {
-          if (!r.ok) throw new Error('bgm fetch failed');
-          return r.blob();
-        })
-        .then((blob) => {
-          bgmBlobUrl = URL.createObjectURL(blob);
-          bgmBlobReady = true;
-          if (bgm.paused && !bgmUserPaused) {
-            const t = bgm.currentTime;
-            bgm.src = bgmBlobUrl;
-            bgm.load();
-            bgm.currentTime = t;
-            if (musicBtn.classList.contains('playing')) bgm.play().catch(() => {});
-          }
-        })
-        .catch(() => {
-          bgmBlobLoading = false;
-        });
-    }
     bgm.load();
     voiceMsg.load();
   };
   document.addEventListener('pointerdown', preheatAudio, { once: true });
   document.addEventListener('touchstart', preheatAudio, { once: true });
   const resumeBgmIfReady = () => {
-    if (bgmBlobReady && bgmBlobUrl && bgm.src !== bgmBlobUrl && bgm.paused && !bgmUserPaused && musicBtn.classList.contains('playing')) {
-      const t = bgm.currentTime;
-      bgm.src = bgmBlobUrl;
-      bgm.load();
-      bgm.currentTime = t;
-    }
     if (bgmUserPaused || !musicBtn.classList.contains('playing') || !bgm.paused) return;
     if (bgm.readyState < 3) return;
     if (voiceMsg && !voiceMsg.paused) return;
-    bgm.play().catch(() => {});
+    const p = bgm.play();
+    if (p) p.catch(() => musicBtn.classList.remove('playing'));
   };
   bgm.addEventListener('canplay', resumeBgmIfReady);
   bgm.addEventListener('pause', () => {
@@ -3351,7 +3321,7 @@
       <button class="photo" type="button" data-index="${baseIndex + i}" data-full="${full(n)}"
         style="--i:${i};--r:${rotations[i]}deg;--t:${shifts[i]}px"
         aria-label="照片 ${n}">
-        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="lazy"></span>
+        <span class="pic"><img src="${thumb(n)}" alt="" decoding="async" loading="${baseIndex >= 8 ? 'eager' : 'lazy'}"></span>
       </button>`).join('');
     container.querySelectorAll('img').forEach((img) => {
       const mark = () => img.classList.add('loaded');
@@ -3694,6 +3664,15 @@
     lightboxImg.onload = () => {
       lightboxImg.onerror = null;
       lightbox.classList.remove('loading');
+      if (step === 0) {
+        const better = new Image();
+        better.onload = () => {
+          if (lightbox.classList.contains('open') && String(lightboxImg.src).includes(thumb(i))) {
+            lightboxImg.src = better.src;
+          }
+        };
+        better.src = lightboxSrc(i);
+      }
     };
     lightboxImg.onerror = () => {
       if (step + 1 < paths.length) loadLightboxPhoto(i, step + 1);
