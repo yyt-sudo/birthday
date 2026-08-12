@@ -2696,15 +2696,19 @@
   const musicBtn = document.getElementById('musicBtn');
   let musicStarted = false;
   let bgmUserPaused = false;
+  let bgmLoadRequested = false;
+  let voiceLoadRequested = false;
   bgm.addEventListener('error', () => {
     musicStarted = false;
+    bgmLoadRequested = false;
     musicBtn.classList.remove('playing');
   });
   const preheatAudio = () => {
     bgm.preload = 'auto';
-    voiceMsg.preload = 'auto';
-    bgm.load();
-    voiceMsg.load();
+    if (!bgmLoadRequested) {
+      bgmLoadRequested = true;
+      bgm.load();
+    }
   };
   document.addEventListener('pointerdown', preheatAudio, { once: true });
   document.addEventListener('touchstart', preheatAudio, { once: true });
@@ -2750,7 +2754,10 @@
       tryPlay();
     } else {
       bgm.addEventListener('canplaythrough', tryPlay, { once: true });
-      bgm.load();
+      if (!bgmLoadRequested) {
+        bgmLoadRequested = true;
+        bgm.load();
+      }
     }
   }
   let bgmFadeRaf = null;
@@ -2907,8 +2914,6 @@
       gateOpenedAt = performance.now();
       entryGate.classList.add('hide');
       startMusic();
-      const voice = document.getElementById('voiceMsg');
-      if (voice) voice.load();
     } else {
       gateError.classList.add('show');
       gateCodes.forEach((i) => { i.value = ''; });
@@ -3204,6 +3209,12 @@
   const voiceBtn = document.getElementById('voiceBtn');
   const voiceLabel = document.getElementById('voiceLabel');
   const voiceMsg = document.getElementById('voiceMsg');
+  function loadVoiceOnce() {
+    if (!voiceLoadRequested && voiceMsg) {
+      voiceLoadRequested = true;
+      voiceMsg.load();
+    }
+  }
   const endingHeart = document.getElementById('endingHeart');
   const endingMessage = document.getElementById('endingMessage');
   const endingHint = document.getElementById('endingHint');
@@ -3639,7 +3650,10 @@
     }
     if (scene === 2) {
       resetLetterEnvelope();
-      if (voiceMsg) voiceMsg.load();
+      if (voiceMsg) {
+        voiceMsg.preload = 'auto';
+        loadVoiceOnce();
+      }
     }
     if (scene === 3) {
       showPhotoPage(0);
@@ -3775,7 +3789,7 @@
         startVoicePlayback();
       } else {
         voiceLabel.textContent = '留言加载中';
-        voiceMsg.load();
+        loadVoiceOnce();
         voiceMsg.removeEventListener('canplaythrough', startVoicePlayback);
         voiceMsg.addEventListener('canplaythrough', startVoicePlayback, { once: true });
         voiceRetryTimer = setTimeout(() => {
