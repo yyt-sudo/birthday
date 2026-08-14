@@ -3893,7 +3893,9 @@
 
   const isMobile = window.matchMedia('(max-width: 760px)').matches || 'ontouchstart' in window;
   function duckBgm() {
-    bgm.volume = 0.12;
+    if (bgmFadeRaf) cancelAnimationFrame(bgmFadeRaf);
+    bgmFadeRaf = null;
+    bgm.volume = 0.04;
     if (!isMobile) {
       window.setTimeout(() => {
         if (musicBtn.classList.contains('playing') && bgm.paused) {
