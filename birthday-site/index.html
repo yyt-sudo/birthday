@@ -3221,6 +3221,7 @@
   let voiceWebPlaying = false;
   let voiceStartedAt = 0;
   let voicePausedAt = 0;
+  let voiceDecodeTimer = null;
   function getVoiceBytes() {
     const src = voiceDataUrl || String(voiceMsg.src);
     if (src.indexOf('data:audio/mpeg') !== 0) return null;
@@ -3232,6 +3233,7 @@
   }
   function playVoiceBuffer() {
     if (!voiceBuffer || !voiceAudioCtx) return;
+    if (voiceAudioCtx.state === 'suspended') voiceAudioCtx.resume().catch(() => {});
     if (voiceSource) {
       try { voiceSource.stop(); } catch (e) {}
       voiceSource.disconnect();
@@ -3255,6 +3257,31 @@
       resumeBgmIfNeeded();
     };
   }
+  function playVoiceViaAudio() {
+    const src = String(voiceMsg.src);
+    if (src.indexOf('voice-message.mp3') === -1) {
+      voiceMsg.src = 'voice-message.mp3?v=5';
+      voiceMsg.load();
+    }
+    voiceMsg.volume = 1;
+    voiceMsg.muted = false;
+    const attempt = () => {
+      const p = voiceMsg.play();
+      if (p) {
+        p.then(() => {
+          voiceLabel.textContent = '暂停留言';
+        }).catch(() => {
+          voiceLabel.textContent = '播放我的留言';
+        });
+      }
+    };
+    if (voiceMsg.readyState >= 3) {
+      attempt();
+    } else {
+      voiceMsg.load();
+      voiceMsg.addEventListener('canplaythrough', attempt, { once: true });
+    }
+  }
   function playVoiceWebAudio() {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return false;
@@ -3271,15 +3298,31 @@
     voiceLabel.textContent = '留言加载中';
     try {
       voiceAudioCtx.decodeAudioData(bytes, (buf) => {
+        if (voiceDecodeTimer) clearTimeout(voiceDecodeTimer);
+        if (!voiceMsg.paused) {
+          voiceLabel.textContent = '暂停留言';
+          return;
+        }
         voiceBuffer = buf;
         playVoiceBuffer();
       }, () => {
+        if (voiceDecodeTimer) clearTimeout(voiceDecodeTimer);
         voiceLabel.textContent = '播放我的留言';
+        playVoiceViaAudio();
       });
+      voiceDecodeTimer = setTimeout(() => {
+        voiceDecodeTimer = null;
+        if (!voiceWebPlaying) {
+          voiceLabel.textContent = '播放我的留言';
+          playVoiceViaAudio();
+        }
+      }, 2500);
       return true;
     } catch (e) {
+      if (voiceDecodeTimer) clearTimeout(voiceDecodeTimer);
       voiceLabel.textContent = '播放我的留言';
-      return false;
+      playVoiceViaAudio();
+      return true;
     }
   }
   function pauseVoiceWebAudio() {
@@ -3870,13 +3913,7 @@
       voiceRetryTimer = null;
     }
     if (playVoiceWebAudio()) return;
-    voiceMsg.volume = 1;
-    voiceMsg.muted = false;
-    voiceMsg.play().then(() => {
-      voiceLabel.textContent = '暂停留言';
-    }).catch(() => {
-      voiceLabel.textContent = '播放我的留言';
-    });
+    playVoiceViaAudio();
   }
   voiceBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -3903,9 +3940,14 @@
     }
   });
   voiceMsg.addEventListener('error', () => {
-    if (voiceMsg.src.includes('voice-message.mp3')) {
-      voiceMsg.src = '录音机-20260806-1534..m4a?v=4';
+    const src = String(voiceMsg.src);
+    if (src.indexOf('voice-message.mp3') !== -1) {
+      voiceMsg.src = '录音机-20260806-1534..m4a?v=5';
       voiceMsg.load();
+    } else if (src.indexOf('data:') === 0 || src.indexOf('blob:') === 0) {
+      voiceMsg.src = 'voice-message.mp3?v=5';
+      voiceMsg.load();
+      playVoiceViaAudio();
     } else {
       voiceLabel.textContent = '播放我的留言';
       resumeBgmIfNeeded();
