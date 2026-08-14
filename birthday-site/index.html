@@ -3222,6 +3222,7 @@
   let voiceStartedAt = 0;
   let voicePausedAt = 0;
   let voiceDecodeTimer = null;
+  let voiceUserRequested = false;
   function getVoiceBytes() {
     const src = voiceDataUrl || String(voiceMsg.src);
     if (src.indexOf('data:audio/mpeg') !== 0) return null;
@@ -3258,6 +3259,7 @@
     };
   }
   function playVoiceViaAudio() {
+    if (!voiceUserRequested) return;
     const src = String(voiceMsg.src);
     if (src.indexOf('voice-message.mp3') === -1) {
       voiceMsg.src = 'voice-message.mp3?v=5';
@@ -3917,6 +3919,7 @@
   }
   voiceBtn.addEventListener('click', (e) => {
     e.stopPropagation();
+    voiceUserRequested = true;
     if (voiceWebPlaying) {
       pauseVoiceWebAudio();
       return;
