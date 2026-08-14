@@ -2696,6 +2696,7 @@
   const musicBtn = document.getElementById('musicBtn');
   let musicStarted = false;
   let bgmUserPaused = false;
+  let bgmPausedForVoice = false;
   let bgmLoadRequested = false;
   let voiceLoadRequested = false;
   bgm.addEventListener('error', () => {
@@ -2718,6 +2719,7 @@
   document.addEventListener('pointerdown', preheatAudio, { once: true });
   document.addEventListener('touchstart', preheatAudio, { once: true });
   const resumeBgmIfReady = () => {
+    if (bgmPausedForVoice) return;
     if (bgmUserPaused || !musicBtn.classList.contains('playing') || !bgm.paused) return;
     if (bgm.readyState < 3) return;
     if (voiceMsg && !voiceMsg.paused) return;
@@ -3892,23 +3894,22 @@
   });
 
   const isMobile = window.matchMedia('(max-width: 760px)').matches || 'ontouchstart' in window;
+  let bgmWasPlaying = false;
   function duckBgm() {
     if (bgmFadeRaf) cancelAnimationFrame(bgmFadeRaf);
     bgmFadeRaf = null;
+    bgmWasPlaying = !bgm.paused;
+    bgmPausedForVoice = true;
+    if (!bgm.paused) bgm.pause();
     bgm.volume = 0.04;
-    if (!isMobile) {
-      window.setTimeout(() => {
-        if (musicBtn.classList.contains('playing') && bgm.paused) {
-          bgm.play().catch(() => {});
-        }
-      }, 120);
-    }
   }
   function resumeBgmIfNeeded() {
     bgm.volume = 1;
-    if (musicBtn.classList.contains('playing') && bgm.paused) {
+    if (bgmWasPlaying && bgm.paused) {
       bgm.play().catch(() => {});
     }
+    bgmWasPlaying = false;
+    bgmPausedForVoice = false;
   }
   let voiceRetryTimer = null;
   function startVoicePlayback() {
@@ -4034,7 +4035,7 @@
     }
   });
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && musicBtn.classList.contains('playing') && bgm.paused) {
+    if (!document.hidden && musicBtn.classList.contains('playing') && bgm.paused && !bgmPausedForVoice) {
       bgm.play().catch(() => {});
     }
   });
