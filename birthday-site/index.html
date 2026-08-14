@@ -3214,10 +3214,92 @@
   const voiceBtn = document.getElementById('voiceBtn');
   const voiceLabel = document.getElementById('voiceLabel');
   const voiceMsg = document.getElementById('voiceMsg');
+  let voiceDataUrl = '';
+  let voiceAudioCtx = null;
+  let voiceBuffer = null;
+  let voiceSource = null;
+  let voiceWebPlaying = false;
+  let voiceStartedAt = 0;
+  let voicePausedAt = 0;
+  function getVoiceBytes() {
+    const src = voiceDataUrl || String(voiceMsg.src);
+    if (src.indexOf('data:audio/mpeg') !== 0) return null;
+    const b64 = src.slice(src.indexOf(',') + 1);
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes.buffer;
+  }
+  function playVoiceBuffer() {
+    if (!voiceBuffer || !voiceAudioCtx) return;
+    if (voiceSource) {
+      try { voiceSource.stop(); } catch (e) {}
+      voiceSource.disconnect();
+      voiceSource = null;
+    }
+    voiceSource = voiceAudioCtx.createBufferSource();
+    voiceSource.buffer = voiceBuffer;
+    voiceSource.connect(voiceAudioCtx.destination);
+    const offset = voicePausedAt || 0;
+    voiceSource.start(0, offset);
+    voiceStartedAt = voiceAudioCtx.currentTime - offset;
+    voiceWebPlaying = true;
+    voicePausedAt = 0;
+    voiceLabel.textContent = '暂停留言';
+    duckBgm();
+    voiceSource.onended = () => {
+      voiceWebPlaying = false;
+      voicePausedAt = 0;
+      voiceSource = null;
+      voiceLabel.textContent = '再听一遍';
+      resumeBgmIfNeeded();
+    };
+  }
+  function playVoiceWebAudio() {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return false;
+    if (!voiceAudioCtx) {
+      try { voiceAudioCtx = new Ctx(); } catch (e) { return false; }
+    }
+    if (voiceAudioCtx.state === 'suspended') voiceAudioCtx.resume().catch(() => {});
+    if (voiceBuffer) {
+      playVoiceBuffer();
+      return true;
+    }
+    const bytes = getVoiceBytes();
+    if (!bytes) return false;
+    voiceLabel.textContent = '留言加载中';
+    try {
+      voiceAudioCtx.decodeAudioData(bytes, (buf) => {
+        voiceBuffer = buf;
+        playVoiceBuffer();
+      }, () => {
+        voiceLabel.textContent = '播放我的留言';
+      });
+      return true;
+    } catch (e) {
+      voiceLabel.textContent = '播放我的留言';
+      return false;
+    }
+  }
+  function pauseVoiceWebAudio() {
+    if (!voiceWebPlaying || !voiceSource || !voiceAudioCtx) return false;
+    voicePausedAt = voiceAudioCtx.currentTime - voiceStartedAt;
+    voiceWebPlaying = false;
+    const s = voiceSource;
+    s.onended = null;
+    try { s.stop(); } catch (e) {}
+    s.disconnect();
+    voiceSource = null;
+    voiceLabel.textContent = '播放我的留言';
+    resumeBgmIfNeeded();
+    return true;
+  }
   function loadVoiceOnce() {
     if (!voiceLoadRequested && voiceMsg) {
       voiceLoadRequested = true;
       const src = String(voiceMsg.src);
+      voiceDataUrl = src;
       if (src.indexOf('data:audio/mpeg') === 0) {
         const b64 = src.slice(src.indexOf(',') + 1);
         const bin = atob(b64);
@@ -3787,6 +3869,7 @@
       clearTimeout(voiceRetryTimer);
       voiceRetryTimer = null;
     }
+    if (playVoiceWebAudio()) return;
     voiceMsg.volume = 1;
     voiceMsg.muted = false;
     voiceMsg.play().then(() => {
@@ -3797,21 +3880,26 @@
   }
   voiceBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (voiceMsg.paused) {
-      if (voiceMsg.readyState >= 3) {
-        startVoicePlayback();
-      } else {
-        voiceLabel.textContent = '留言加载中';
-        loadVoiceOnce();
-        voiceMsg.removeEventListener('canplaythrough', startVoicePlayback);
-        voiceMsg.addEventListener('canplaythrough', startVoicePlayback, { once: true });
-        voiceRetryTimer = setTimeout(() => {
-          voiceLabel.textContent = '播放我的留言';
-        }, 6000);
-      }
-    } else {
+    if (voiceWebPlaying) {
+      pauseVoiceWebAudio();
+      return;
+    }
+    if (!voiceMsg.paused) {
       voiceMsg.pause();
       voiceLabel.textContent = '播放我的留言';
+      return;
+    }
+    if (playVoiceWebAudio()) return;
+    if (voiceMsg.readyState >= 3) {
+      startVoicePlayback();
+    } else {
+      voiceLabel.textContent = '留言加载中';
+      loadVoiceOnce();
+      voiceMsg.removeEventListener('canplaythrough', startVoicePlayback);
+      voiceMsg.addEventListener('canplaythrough', startVoicePlayback, { once: true });
+      voiceRetryTimer = setTimeout(() => {
+        voiceLabel.textContent = '播放我的留言';
+      }, 6000);
     }
   });
   voiceMsg.addEventListener('error', () => {
